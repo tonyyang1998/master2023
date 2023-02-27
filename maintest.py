@@ -92,34 +92,38 @@ T_k = {}
 driver_origin_nodes = {k: o_k[k] for k in D}
 driver_destination_nodes = {k: d_k[k] for k in D}
 
-print(PD)
-print(list(o_k.keys()))
+print(MP_i)
 
 def initialize_Ak():
     result = {}
     Ak = {k: [((i,m),(j,n)) for (i,m) in NR + [o_k[k]] for (j,n) in NR + [d_k[k]] if ((i,m)!=(j,n))] for k in D}
     for driver in Ak:
-        all_arcs = Ak[driver]
-        print(len(all_arcs))
+        all_ar = list(Ak[driver])
+        all_arcs = all_ar
         for arc in all_arcs:
             """Remove all arcs where (i,m) is a pick up node and (j,n) is driver destination"""
             if arc[0] in NP and arc[1] in list(d_k.values()):
                 all_arcs.remove(arc)
 
             """Remove all arcs where (i,m) is a driver origin and (j,n) is a delivery node"""
-            if (arc[0] in list(o_k.values()) and arc[1] in ND) or (arc[0][0] in list(o_k.keys()) and arc[1][0] in PD):
-                print("HEIEI", arc)
+            if (arc[0] in list(o_k.values()) and arc[1] in ND) or (arc[0][0] in list(o_k.keys()) and arc[1][0] in PD) or (arc == ((0, 0), (6, 0))):
                 all_arcs.remove(arc)
             
-            """Remove all arcs where between candidate locations - SE PÅ NYTT"""
-            if arc[0][0] in PP and arc[1][0] in PP and arc[0][0]==arc[1][0]:
+            """Remove all arcs where between candidate locations"""
+            if (arc[0][0]==arc[1][0]):
+                print(arc[0][0],arc[1][0] )
                 all_arcs.remove(arc)
+                
             
             """Remove all arcs where (i,m) is a delivery and (j,n) is a pick up node"""
             if arc[0] in ND and arc[1] in NP:
                 all_arcs.remove(arc)
-        
         print(all_arcs)
+
+        
+        result[driver] = all_arcs
+
+   
         
 
 print(initialize_Ak())
