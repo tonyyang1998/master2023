@@ -59,16 +59,17 @@ def initialize_MPi():
     return MP_i
 
 MP_i = initialize_MPi()
+
 #print(MP_i)
 MD_i = {i: 0 for i in PP}
 
 def initialize_NP():
     NP = []
     for passengers in PP:
-        if len(MP_i[passengers])==0:
-            NP.append((passengers, 0))
         for candidate_locations in MP_i[passengers]:
             NP.append((passengers, candidate_locations))
+        if (passengers, 0) not in NP:
+            NP.append((passengers, 0))
     return NP
 
 def initialize_ND():
@@ -83,28 +84,43 @@ ND = initialize_ND()
 NR = NP + ND
 
 
-
 '''Parameters'''
 o_k = {k:(k, 0) for k in D}
 d_k = {k:(k + 2*nr_passengers + nr_drivers, 0) for k in D}
 T_k = {}
 
+driver_origin_nodes = {k: o_k[k] for k in D}
+driver_destination_nodes = {k: d_k[k] for k in D}
+
+print(PD)
+print(list(o_k.keys()))
 
 def initialize_Ak():
     result = {}
     Ak = {k: [((i,m),(j,n)) for (i,m) in NR + [o_k[k]] for (j,n) in NR + [d_k[k]] if ((i,m)!=(j,n))] for k in D}
     for driver in Ak:
         all_arcs = Ak[driver]
+        print(len(all_arcs))
         for arc in all_arcs:
             """Remove all arcs where (i,m) is a pick up node and (j,n) is driver destination"""
-            
-            if arc[0][0] in PP and arc[1][0] in list(d_k.keys()):
-                print(arc[0][0])
+            if arc[0] in NP and arc[1] in list(d_k.values()):
                 all_arcs.remove(arc)
 
-
-
-
+            """Remove all arcs where (i,m) is a driver origin and (j,n) is a delivery node"""
+            if (arc[0] in list(o_k.values()) and arc[1] in ND) or (arc[0][0] in list(o_k.keys()) and arc[1][0] in PD):
+                print("HEIEI", arc)
+                all_arcs.remove(arc)
+            
+            """Remove all arcs where between candidate locations - SE PÅ NYTT"""
+            if arc[0][0] in PP and arc[1][0] in PP and arc[0][0]==arc[1][0]:
+                all_arcs.remove(arc)
+            
+            """Remove all arcs where (i,m) is a delivery and (j,n) is a pick up node"""
+            if arc[0] in ND and arc[1] in NP:
+                all_arcs.remove(arc)
+        
+        print(all_arcs)
+        
 
 print(initialize_Ak())
 
