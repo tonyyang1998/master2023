@@ -1,26 +1,26 @@
 {
   "P2": {
     "id": 2,
-    "origin_location": "Straume",
+    "origin_location": "Tr\u00e6sneset",
     "destination_location": "Laksev\u00e5g",
     "lower_tw": 120,
     "upper_tw": 150,
-    "max_ride_time": 30.0
+    "max_ride_time": 72.0
   },
   "P3": {
     "id": 3,
-    "origin_location": "Knappskog",
-    "destination_location": "\u00c5rstad",
+    "origin_location": "Tofter\u00f8y",
+    "destination_location": "Ytrebygda",
     "lower_tw": 120,
     "upper_tw": 150,
-    "max_ride_time": 58.0
+    "max_ride_time": 96.0
   },
   "P4": {
     "id": 4,
-    "origin_location": "Skogsv\u00e5g",
-    "destination_location": "Bergenhus",
+    "origin_location": "Brattholmen",
+    "destination_location": "Laksev\u00e5g",
     "lower_tw": 120,
     "upper_tw": 150,
-    "max_ride_time": 80.0
+    "max_ride_time": 34.0
   }
 }

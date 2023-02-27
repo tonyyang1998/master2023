@@ -93,38 +93,40 @@ driver_origin_nodes = {k: o_k[k] for k in D}
 driver_destination_nodes = {k: d_k[k] for k in D}
 
 print(MP_i)
-
+print(NR)
+print()
 def initialize_Ak():
     result = {}
     Ak = {k: [((i,m),(j,n)) for (i,m) in NR + [o_k[k]] for (j,n) in NR + [d_k[k]] if ((i,m)!=(j,n))] for k in D}
     for driver in Ak:
         all_ar = list(Ak[driver])
         all_arcs = all_ar
+        
         for arc in all_arcs:
             """Remove all arcs where (i,m) is a pick up node and (j,n) is driver destination"""
             if arc[0] in NP and arc[1] in list(d_k.values()):
                 all_arcs.remove(arc)
-
-            """Remove all arcs where (i,m) is a driver origin and (j,n) is a delivery node"""
-            if (arc[0] in list(o_k.values()) and arc[1] in ND) or (arc[0][0] in list(o_k.keys()) and arc[1][0] in PD) or (arc == ((0, 0), (6, 0))):
-                all_arcs.remove(arc)
             
+        new_edges=[]
+        for edge in all_arcs:
             """Remove all arcs where between candidate locations"""
-            if (arc[0][0]==arc[1][0]):
-                print(arc[0][0],arc[1][0] )
-                all_arcs.remove(arc)
+            if edge[0][0] != edge[1][0]:
+                new_edges.append(edge)
                 
-            
-            """Remove all arcs where (i,m) is a delivery and (j,n) is a pick up node"""
-            if arc[0] in ND and arc[1] in NP:
-                all_arcs.remove(arc)
-        print(all_arcs)
+        """Remove all arcs where (i,m) is a delivery and (j,n) is a pick up node"""
+        new_edges1 = [edge for edge in new_edges if not (edge[0][0] >= nr_drivers + nr_passengers and edge[1][0] <= nr_drivers + nr_passengers - 1)]
+        """Remove all arcs where (i,m) is a driver origin and (j,n) is a delivery node"""
+        new_edges2 = [edge for edge in new_edges1 if not (edge[0][0] in D and edge[1][0] in PD)]
+       
 
         
-        result[driver] = all_arcs
+        print(new_edges2)
+        print(len(new_edges1))
+        print(len(new_edges2))
 
-   
-        
+        result[driver] = new_edges
+
+
 
 print(initialize_Ak())
 
