@@ -274,8 +274,6 @@ def process_AK(NK):
                         if T_ij[(i,j)] + T_ij[(j, nr_passengers + i)] > T_k[i]:
                             arcs.remove((i, j))
                             arcs.remove((j, nr_passengers+i))
-
-
         result[driver] = arcs
 
     return result

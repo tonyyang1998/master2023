@@ -18,7 +18,6 @@ start_time = time.time()
 passengers_json = json.load(open('sample_passenger.json'))
 drivers_json = json.load(open('sample_driver.json'))
 
-
 rnd = np.random
 rnd.seed(0)
 
@@ -33,8 +32,10 @@ PD = all_node_index[int(len(all_node_index) / 2):-int(len(D))]
 P = PP + PD
 
 location_index = {"Knappskog": 1, "Kolltveit":2, "Blomøy":3, "Hellesøy":4, "Foldnes":5,"Brattholmen":6,"Arefjord":7, "Ebbesvik":8,"Straume":9,"Spjeld":10,"Landro":11, "Knarrevik":12,"Hjelteryggen":13,"Skogsvåg":14,"Kleppestø":15,"Solsvik":16,"Rongøy":17,"Hammarsland":18,"Telavåg":19,"Træsneset":20,"Tofterøy":21,"Bildøyna":22,"Kårtveit":23, "Bergenshus":24, "Laksevåg":25, "Ytrebydga":26, "Årstad": 27}
+index_location = {y: x for x, y in location_index.items()}
 
-def passenger_candidate_location_initialization():
+
+def passenger_candidate_pickup_location_initialization():
     all_location_pairs = distance_matrix.distance_matrix.keys()
     result = {}
     
@@ -49,28 +50,57 @@ def passenger_candidate_location_initialization():
 
 def initialize_MPi():
     MP_i = {}
-    locations =  passenger_candidate_location_initialization()
+    locations =  passenger_candidate_pickup_location_initialization()
     for passenger in locations:
         result = []
         for location_pair in locations[passenger]:
             result.append(location_index[location_pair[1]])
         MP_i[passenger] = result
-
     return MP_i
 
 MP_i = initialize_MPi()
+print(MP_i)
+MD_i = {i: 0 for i in PP}
 
+def initialize_NP():
+    NP = []
+    for passengers in PP:
+        for candidate_locations in MP_i[passengers]:
+            if (passengers, 0) not in NP:
+                NP.append((passengers, 0))
+            NP.append((passengers, candidate_locations))
+    return NP
 
-delivery_and_pickup_node_pairs = {PD[i]: PP[i] for i in range(len(PD))}
-pickup_and_delivery_node_pairs = {PP[i]: PD[i] for i in range(len(PD))}
+def initialize_ND():
+    ND = []
+    for passengers in PP:
+            if (passengers, 0) not in ND:
+                    ND.append((passengers, 0))
+            ND.append((passengers, MD_i[passengers]))
+    return ND
+
+NP = initialize_NP()
+ND = initialize_ND()
+NR = NP + ND
+print(NP)
+print("Hei")
 
 
 
 '''Parameters'''
-o_k = {}
-d_k = {}
+o_k = {k:(k, 0) for k in D}
+d_k = {k:(k + 2*nr_passengers + nr_drivers, 0) for k in D}
 T_k = {}
-T_ij = {(i, j): np.hypot(xc[i] - xc[j], yc[i] - yc[j]) for i, j in A}
+
+def initialize_Timjn():
+    T_imjn = {}
+    for node in NR + list(o_k.values()):
+        print("")
+    
+print(initialize_Timjn())
+        
+
+
 
 Q_k = {}
 A_k1 = {}
@@ -84,7 +114,7 @@ def add_parameters():
     for drivers in drivers_json:
         o_k[drivers_json[drivers]['id']] = drivers_json[drivers]['id']
         d_k[drivers_json[drivers]['id']] = drivers_json[drivers]['id'] + nr_passengers * 2 + nr_drivers
-        T_k[drivers_json[drivers]['id']] = drivers_json[drivers]['max_ride_time'] * 1.9/1.5
+        T_k[drivers_json[drivers]['id']] = drivers_json[drivers]['max_ride_time'] * 1.5
         Q_k[drivers_json[drivers]['id']] = drivers_json[drivers]['max_capacity']
         A_k1[drivers_json[drivers]['id'] + nr_passengers * 2 + nr_drivers] = drivers_json[drivers]['lower_tw']
         A_k2[drivers_json[drivers]['id'] + nr_passengers * 2 + nr_drivers] = drivers_json[drivers]['upper_tw']
@@ -94,6 +124,14 @@ def add_parameters():
         A_k2[passengers_json[passengers]['id'] + nr_passengers] = passengers_json[passengers]['upper_tw']
 
 add_parameters()
+
+"""Helper functions"""
+
+delivery_and_pickup_node_pairs = {PD[i]: PP[i] for i in range(len(PD))}
+pickup_and_delivery_node_pairs = {PP[i]: PD[i] for i in range(len(PD))}
+
+
+
 
 driver_origin_nodes = {k: o_k[k] for k in D}
 driver_destination_nodes = {k: d_k[k] for k in D}
