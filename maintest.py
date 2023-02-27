@@ -59,31 +59,28 @@ def initialize_MPi():
     return MP_i
 
 MP_i = initialize_MPi()
-print(MP_i)
+#print(MP_i)
 MD_i = {i: 0 for i in PP}
 
 def initialize_NP():
     NP = []
     for passengers in PP:
+        if len(MP_i[passengers])==0:
+            NP.append((passengers, 0))
         for candidate_locations in MP_i[passengers]:
-            if (passengers, 0) not in NP:
-                NP.append((passengers, 0))
             NP.append((passengers, candidate_locations))
     return NP
 
 def initialize_ND():
+    """Må bearbeides"""
     ND = []
-    for passengers in PP:
-            if (passengers, 0) not in ND:
-                    ND.append((passengers, 0))
-            ND.append((passengers, MD_i[passengers]))
+    for passengers in PD:
+            ND.append((passengers, MD_i[passengers-nr_passengers]))
     return ND
 
 NP = initialize_NP()
 ND = initialize_ND()
 NR = NP + ND
-print(NP)
-print("Hei")
 
 
 
@@ -92,15 +89,38 @@ o_k = {k:(k, 0) for k in D}
 d_k = {k:(k + 2*nr_passengers + nr_drivers, 0) for k in D}
 T_k = {}
 
+
+def initialize_Ak():
+    result = {}
+    Ak = {k: [((i,m),(j,n)) for (i,m) in NR + [o_k[k]] for (j,n) in NR + [d_k[k]] if ((i,m)!=(j,n))] for k in D}
+    for driver in Ak:
+        all_arcs = Ak[driver]
+        for arc in all_arcs:
+            """Remove all arcs where (i,m) is a pick up node and (j,n) is driver destination"""
+            
+            if arc[0][0] in PP and arc[1][0] in list(d_k.keys()):
+                print(arc[0][0])
+                all_arcs.remove(arc)
+
+
+
+
+
+print(initialize_Ak())
+
 def initialize_Timjn():
+    """IKKE ferdig"""
     T_imjn = {}
     for node in NR + list(o_k.values()):
-        print("")
+        print(node)
+        if node[0] in D and node[1] in PP:
+            stedsnavn1 = drivers_json["D"+str(node[0])]["origin_location"]
+            stedsnavn2 = passengers_json["P" + str(node[1])]["origin_location"]
+            print(stedsnavn1)
+            print(stedsnavn2)
+
     
-print(initialize_Timjn())
-        
-
-
+#print(initialize_Timjn())
 
 Q_k = {}
 A_k1 = {}
