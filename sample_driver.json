@@ -1,0 +1,92 @@
+{
+  "D0": {
+    "id": 0,
+    "origin_location": "Knappskog",
+    "destination_location": "Laksev\u00e5g",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 42.0,
+    "max_capacity": 4.0
+  },
+  "D1": {
+    "id": 1,
+    "origin_location": "K\u00e5rtveit",
+    "destination_location": "\u00c5rstad",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 68.0,
+    "max_capacity": 4.0
+  },
+  "D2": {
+    "id": 2,
+    "origin_location": "Tofter\u00f8y",
+    "destination_location": "\u00c5rstad",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 104.0,
+    "max_capacity": 4.0
+  },
+  "D3": {
+    "id": 3,
+    "origin_location": "Solsvik",
+    "destination_location": "\u00c5rstad",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 80.0,
+    "max_capacity": 4.0
+  },
+  "D4": {
+    "id": 4,
+    "origin_location": "Hjelteryggen",
+    "destination_location": "Bergenhus",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 42.0,
+    "max_capacity": 4.0
+  },
+  "D5": {
+    "id": 5,
+    "origin_location": "Solsvik",
+    "destination_location": "Bergenhus",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 78.0,
+    "max_capacity": 4.0
+  },
+  "D6": {
+    "id": 6,
+    "origin_location": "Knappskog",
+    "destination_location": "Bergenhus",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 54.0,
+    "max_capacity": 4.0
+  },
+  "D7": {
+    "id": 7,
+    "origin_location": "Rong\u00f8y",
+    "destination_location": "Laksev\u00e5g",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 74.0,
+    "max_capacity": 4.0
+  },
+  "D8": {
+    "id": 8,
+    "origin_location": "Straume",
+    "destination_location": "Bergenhus",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 44.0,
+    "max_capacity": 4.0
+  },
+  "D9": {
+    "id": 9,
+    "origin_location": "Solsvik",
+    "destination_location": "Ytrebygda",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 72.0,
+    "max_capacity": 4.0
+  }
+}

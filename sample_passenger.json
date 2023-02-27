@@ -1,0 +1,186 @@
+{
+  "P10": {
+    "id": 10,
+    "origin_location": "Straume",
+    "destination_location": "Laksev\u00e5g",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 30.0
+  },
+  "P11": {
+    "id": 11,
+    "origin_location": "Bild\u00f8yna",
+    "destination_location": "Ytrebygda",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 38.0
+  },
+  "P12": {
+    "id": 12,
+    "origin_location": "Kleppest\u00f8",
+    "destination_location": "Ytrebygda",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 42.0
+  },
+  "P13": {
+    "id": 13,
+    "origin_location": "Hjelteryggen",
+    "destination_location": "\u00c5rstad",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 44.0
+  },
+  "P14": {
+    "id": 14,
+    "origin_location": "Straume",
+    "destination_location": "Bergenhus",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 44.0
+  },
+  "P15": {
+    "id": 15,
+    "origin_location": "Skogsv\u00e5g",
+    "destination_location": "\u00c5rstad",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 82.0
+  },
+  "P16": {
+    "id": 16,
+    "origin_location": "Arefjord",
+    "destination_location": "Laksev\u00e5g",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 30.0
+  },
+  "P17": {
+    "id": 17,
+    "origin_location": "Arefjord",
+    "destination_location": "\u00c5rstad",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 46.0
+  },
+  "P18": {
+    "id": 18,
+    "origin_location": "Landro",
+    "destination_location": "\u00c5rstad",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 74.0
+  },
+  "P19": {
+    "id": 19,
+    "origin_location": "Ebbesvika",
+    "destination_location": "Ytrebygda",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 48.0
+  },
+  "P20": {
+    "id": 20,
+    "origin_location": "Hjelteryggen",
+    "destination_location": "Ytrebygda",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 36.0
+  },
+  "P21": {
+    "id": 21,
+    "origin_location": "Ebbesvika",
+    "destination_location": "\u00c5rstad",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 56.0
+  },
+  "P22": {
+    "id": 22,
+    "origin_location": "Brattholmen",
+    "destination_location": "Laksev\u00e5g",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 34.0
+  },
+  "P23": {
+    "id": 23,
+    "origin_location": "Kolltveit",
+    "destination_location": "Bergenhus",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 52.0
+  },
+  "P24": {
+    "id": 24,
+    "origin_location": "Skogsv\u00e5g",
+    "destination_location": "Ytrebygda",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 74.0
+  },
+  "P25": {
+    "id": 25,
+    "origin_location": "K\u00e5rtveit",
+    "destination_location": "\u00c5rstad",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 68.0
+  },
+  "P26": {
+    "id": 26,
+    "origin_location": "Blom\u00f8y",
+    "destination_location": "Ytrebygda",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 94.0
+  },
+  "P27": {
+    "id": 27,
+    "origin_location": "Foldnes",
+    "destination_location": "Bergenhus",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 54.0
+  },
+  "P28": {
+    "id": 28,
+    "origin_location": "Hammersland",
+    "destination_location": "\u00c5rstad",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 76.0
+  },
+  "P29": {
+    "id": 29,
+    "origin_location": "Bild\u00f8yna",
+    "destination_location": "Bergenhus",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 44.0
+  },
+  "P30": {
+    "id": 30,
+    "origin_location": "Rong\u00f8y",
+    "destination_location": "Bergenhus",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 88.0
+  },
+  "P31": {
+    "id": 31,
+    "origin_location": "K\u00e5rtveit",
+    "destination_location": "\u00c5rstad",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 68.0
+  },
+  "P32": {
+    "id": 32,
+    "origin_location": "Rong\u00f8y",
+    "destination_location": "Ytrebygda",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 82.0
+  }
+}
