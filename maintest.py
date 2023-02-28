@@ -33,7 +33,7 @@ P = PP + PD
 
 location_index = {"Knappskog": 1, "Kolltveit":2, "Blomøy":3, "Hellesøy":4, "Foldnes":5,"Brattholmen":6,"Arefjord":7, "Ebbesvik":8,"Straume":9,"Spjeld":10,"Landro":11, "Knarrevik":12,"Hjelteryggen":13,"Skogsvåg":14,"Kleppestø":15,"Solsvik":16,"Rongøy":17,"Hammarsland":18,"Telavåg":19,"Træsneset":20,"Tofterøy":21,"Bildøyna":22,"Kårtveit":23, "Bergenshus":24, "Laksevåg":25, "Ytrebydga":26, "Årstad": 27}
 index_location = {y: x for x, y in location_index.items()}
-
+print(index_location)
 
 def passenger_candidate_pickup_location_initialization():
     all_location_pairs = distance_matrix.distance_matrix.keys()
@@ -83,18 +83,13 @@ NP = initialize_NP()
 ND = initialize_ND()
 NR = NP + ND
 
-
 '''Parameters'''
 o_k = {k:(k, 0) for k in D}
 d_k = {k:(k + 2*nr_passengers + nr_drivers, 0) for k in D}
-T_k = {}
 
 driver_origin_nodes = {k: o_k[k] for k in D}
 driver_destination_nodes = {k: d_k[k] for k in D}
 
-print(MP_i)
-print(NR)
-print()
 def initialize_Ak():
     result = {}
     Ak = {k: [((i,m),(j,n)) for (i,m) in NR + [o_k[k]] for (j,n) in NR + [d_k[k]] if ((i,m)!=(j,n))] for k in D}
@@ -117,45 +112,212 @@ def initialize_Ak():
         new_edges1 = [edge for edge in new_edges if not (edge[0][0] >= nr_drivers + nr_passengers and edge[1][0] <= nr_drivers + nr_passengers - 1)]
         """Remove all arcs where (i,m) is a driver origin and (j,n) is a delivery node"""
         new_edges2 = [edge for edge in new_edges1 if not (edge[0][0] in D and edge[1][0] in PD)]
-       
+        result[driver] = new_edges2
+    return result
 
-        
-        print(new_edges2)
-        print(len(new_edges1))
-        print(len(new_edges2))
-
-        result[driver] = new_edges
-
-
-
-print(initialize_Ak())
+A_k = initialize_Ak()
 
 def initialize_Timjn():
     """IKKE ferdig"""
     T_imjn = {}
-    for node in NR + list(o_k.values()):
-        print(node)
-        if node[0] in D and node[1] in PP:
-            stedsnavn1 = drivers_json["D"+str(node[0])]["origin_location"]
-            stedsnavn2 = passengers_json["P" + str(node[1])]["origin_location"]
-            print(stedsnavn1)
-            print(stedsnavn2)
+    for driver in A_k:
+        for arc in A_k[driver]:
+            """Between driver origin and and destination"""
+            if arc[0][0] in D and arc[1][0] in d_k[driver]:
+                stedsnavn1 = drivers_json["D" + str(arc[0][0])]["origin_location"]
+                stedsnavn2 = drivers_json["D" + str(arc[0][0])]["destination_location"]
+                distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                T_imjn[arc] = distance
 
-    
-#print(initialize_Timjn())
+            """Between driver origin and all pick up candidate locations """
+            if arc[0][0] in D and arc[1][0] in PP:
+                """If pick up node is (j, x)"""
+                if arc[1][1]!=0:
+                    stedsnavn1 = drivers_json["D" + str(arc[0][0])]["origin_location"]
+                    stedsnavn2 = index_location[arc[1][1]]
+                    distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                    T_imjn[arc] = distance
+                else:   
+                    """If pick up node is (j, 0)""" 
+                    stedsnavn1 = drivers_json["D" + str(arc[0][0])]["origin_location"]
+                    stedsnavn2 = passengers_json["P" + str(arc[1][0])]["origin_location"]
+                    distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                    T_imjn[arc] = distance
 
-Q_k = {}
+            """Between all pick up nodes"""
+            if arc[0][0] in PP and arc[1][0] in PP:
+                """Between origins"""
+                if arc[0][1] == 0 and arc[1][1] == 0:      
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
+                    stedsnavn2 = passengers_json["P" + str(arc[1][0])]["origin_location"]
+                    distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                    
+                    T_imjn[arc] = distance
+                """From origin to candidate pick up """
+                if arc[0][1] == 0 and arc[1][1] != 0:
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
+                    stedsnavn2 = index_location[arc[1][1]]
+                    distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                    
+                    T_imjn[arc] = distance
+                """Between candidate pick ups"""
+                if arc[0][1] != 0 and arc[1][1] != 0:
+                    stedsnavn1 = index_location[arc[0][1]]
+                    stedsnavn2 = index_location[arc[1][1]]
+                    distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                   
+                    T_imjn[arc] = distance
+                """From candidate pick up to origin"""
+                if arc[0][1] != 0 and arc[1][1] == 0:
+                    stedsnavn1 = index_location[arc[0][1]]
+                    stedsnavn2 = passengers_json["P" + str(arc[1][0])]["origin_location"]
+                    distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                    T_imjn[arc] = distance
+
+            """Between pick up and delivery nodes"""
+            if arc[0][0] in PP and arc[1][0] in PD:
+                """Between origin and destination"""
+                if arc[0][1] == 0 and arc[1][1] == 0:      
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
+                    stedsnavn2 = passengers_json["P" + str(arc[1][0] - nr_passengers)]["destination_location"]
+                    distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                    T_imjn[arc] = distance
+                """From origin to candidate delivery (Ingen candidate deliveries atm) """
+                if arc[0][1] == 0 and arc[1][1] != 0:
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
+                    stedsnavn2 = index_location[arc[1][1]]
+                    distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+            
+                    T_imjn[arc] = distance
+                """Between candidate pick up to candidate delivery"""
+                if arc[0][1] != 0 and arc[1][1] != 0:
+                    stedsnavn1 = index_location[arc[0][1]]
+                    stedsnavn2 = index_location[arc[1][1]]
+                    distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                    T_imjn[arc] = distance
+                """From candidate pick up to destination"""
+                if arc[0][1] != 0 and arc[1][1] == 0:
+                    stedsnavn1 = index_location[arc[0][1]]
+                    stedsnavn2 = passengers_json["P" + str(arc[1][0] - nr_passengers)]["destination_location"]
+                    distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                    T_imjn[arc] = distance
+
+            """Between all delivery nodes"""
+            if arc[0][0] in PD and arc[1][0] in PD:
+                """Between destinations"""
+                if arc[0][1] == 0 and arc[1][1] == 0:      
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0] - nr_passengers)]["destination_location"]
+                    stedsnavn2 = passengers_json["P" + str(arc[1][0] - nr_passengers)]["destination_location"]
+                    distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                    T_imjn[arc] = distance
+                """From destination to candidate delivery (Ingen candidate deliveries atm) """
+                if arc[0][1] == 0 and arc[1][1] != 0:
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0] - nr_passengers)]["destination_location"]
+                    stedsnavn2 = index_location[arc[1][1]]
+                    distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                    T_imjn[arc] = distance
+                """Between candidate pick up and candidate deliveries"""
+                if arc[0][1] != 0 and arc[1][1] != 0:
+                    stedsnavn1 = index_location[arc[0][1]]
+                    stedsnavn2 = index_location[arc[1][1]]
+                    distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                    T_imjn[arc] = distance
+                """From candidate delivery to destination"""
+                if arc[0][1] != 0 and arc[1][1] == 0:
+                    stedsnavn1 = index_location[arc[0][1]]
+                    stedsnavn2 = passengers_json["P" + str(arc[1][0] - nr_passengers)]["destination_location"]
+                    distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                    T_imjn[arc] = distance
+
+            """From candidate delivery to driver destination"""
+            if arc[0][0] in PD and arc[1][0] in d_k[driver]:
+                """Between passenger destinations and driver destination"""
+                if arc[0][1] == 0 and arc[1][1] == 0:      
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0] - nr_passengers)]["destination_location"]
+                    stedsnavn2 = drivers_json["D" + str(arc[1][0] - nr_drivers - 2*nr_passengers)]["destination_location"]
+                    distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                    T_imjn[arc] = distance
+                """From candidate delivery to driver destination"""
+                if arc[0][1] != 0 and arc[1][1] == 0:
+                    stedsnavn1 = index_location[arc[0][1]]
+                    stedsnavn2 = drivers_json["D" + str(arc[1][0] - nr_drivers - 2*nr_passengers)]["destination_location"]
+                    distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                    T_imjn[arc] = distance
+        return T_imjn
+
+T_imjn = initialize_Timjn()
+
+def initialize_Tim():
+    Tim = {}
+    visited_nodes = []
+    arcs = list(T_imjn.keys())
+    for arc in arcs:
+        node1 = arc[0]
+        node2 = arc[1]
+        if node1 not in visited_nodes:
+            """If pick up node1 is (i, 0)"""
+            if node1[0] in PP and node1[1] == 0:
+                Tim[node1] = 0.1 
+                visited_nodes.append(node1)
+            """If pick up node1 is (i, x)"""
+            if node1[0] in PP and node1[1] != 0:
+                stedsnavn1 = passengers_json["P" + str(node1[0])]["origin_location"]
+                stedsnavn2 = index_location[node1[1]]
+                distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                Tim[node1] = distance
+                visited_nodes.append(node1)
+
+            """If delivery node1 is (j, 0)"""
+            if node1[0] in PD and node1[1] == 0:
+                Tim[node1] = 0.1 
+                visited_nodes.append(node1)
+            """If delivery node1 is (j, x)"""
+            if node1[0] in PD and node1[1] != 0:
+                stedsnavn1 = passengers_json["P" + str(node1[0] - nr_passengers)]["destination_location"]
+                stedsnavn2 = index_location[node1[1]]
+                distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                Tim[node1] = distance
+                visited_nodes.append(node1)
+
+        if node2 not in visited_nodes:
+            """If pick up node2 is (i, 0)"""
+            if node2[0] in PP and node2[1] == 0:
+                Tim[node2] = 0.1 
+                visited_nodes.append(node2)
+            """If pick up node2 is (i, x)"""
+            if node2[0] in PP and node2[1] != 0:
+                stedsnavn1 = passengers_json["P" + str(node2[0])]["origin_location"]
+                stedsnavn2 = index_location[node2[1]]
+                distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                Tim[node2] = distance
+                visited_nodes.append(node2)
+
+            """If delivery node2 is (j, 0)"""
+            if node2[0] in PD and node2[1] == 0:
+                Tim[node2] = 0.1 
+                visited_nodes.append(node2)
+            """If delivery node2 is (j, x)"""
+            if node2[0] in PD and node2[1] != 0:
+                stedsnavn1 = passengers_json["P" + str(node2[0] - nr_passengers)]["destination_location"]
+                stedsnavn2 = index_location[node2[1]]
+                distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                Tim[node2] = distance
+                visited_nodes.append(node2)
+    return Tim
+
+T_im = initialize_Tim()
+
+
 A_k1 = {}
 A_k2 = {}
-
+Q_k = {}
+T_k = {}
 
 def add_parameters():
     """ Use driver and passenger information from json. files to add Parameters
         :return:
         """
     for drivers in drivers_json:
-        o_k[drivers_json[drivers]['id']] = drivers_json[drivers]['id']
-        d_k[drivers_json[drivers]['id']] = drivers_json[drivers]['id'] + nr_passengers * 2 + nr_drivers
         T_k[drivers_json[drivers]['id']] = drivers_json[drivers]['max_ride_time'] * 1.5
         Q_k[drivers_json[drivers]['id']] = drivers_json[drivers]['max_capacity']
         A_k1[drivers_json[drivers]['id'] + nr_passengers * 2 + nr_drivers] = drivers_json[drivers]['lower_tw']
@@ -171,20 +333,14 @@ add_parameters()
 
 delivery_and_pickup_node_pairs = {PD[i]: PP[i] for i in range(len(PD))}
 pickup_and_delivery_node_pairs = {PP[i]: PD[i] for i in range(len(PD))}
-
-
-
-
 driver_origin_nodes = {k: o_k[k] for k in D}
 driver_destination_nodes = {k: d_k[k] for k in D}
-
 
 def initialize_big_M():
     result={}
     for driver in D:
         result[driver] = T_k[driver] * 2.5
     return result
-
 
 M = initialize_big_M()
 

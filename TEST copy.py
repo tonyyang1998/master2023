@@ -130,7 +130,6 @@ def create_Tij():
             distance = distance_matrix[(stedsnavn1, stedsnavn2)]
             t_ij[(i,j)] = distance
         if i in ND and j in ND:
-
             stedsnavn1 = passengers_json["P" + str(i - nr_passengers)]["destination_location"]
             stedsnavn2 = passengers_json["P" + str(j - nr_passengers)]["destination_location"]
            
