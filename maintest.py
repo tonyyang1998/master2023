@@ -33,7 +33,6 @@ P = PP + PD
 
 location_index = {"Knappskog": 1, "Kolltveit":2, "Blomøy":3, "Hellesøy":4, "Foldnes":5,"Brattholmen":6,"Arefjord":7, "Ebbesvik":8,"Straume":9,"Spjeld":10,"Landro":11, "Knarrevik":12,"Hjelteryggen":13,"Skogsvåg":14,"Kleppestø":15,"Solsvik":16,"Rongøy":17,"Hammarsland":18,"Telavåg":19,"Træsneset":20,"Tofterøy":21,"Bildøyna":22,"Kårtveit":23, "Bergenshus":24, "Laksevåg":25, "Ytrebydga":26, "Årstad": 27}
 index_location = {y: x for x, y in location_index.items()}
-print(index_location)
 
 def passenger_candidate_pickup_location_initialization():
     all_location_pairs = distance_matrix.distance_matrix.keys()
@@ -59,9 +58,18 @@ def initialize_MPi():
     return MP_i
 
 MP_i = initialize_MPi()
-
 #print(MP_i)
 MD_i = {i: 0 for i in PP}
+
+
+
+def initialize_M_i():
+    Mi = {}
+    for passenger in PP:
+        Mi[passenger] = MP_i[passenger] + [MD_i[passenger]]
+    return Mi
+M_i = initialize_M_i()
+
 
 def initialize_NP():
     NP = []
@@ -190,7 +198,9 @@ def initialize_Timjn():
             
                     T_imjn[arc] = distance
                 """Between candidate pick up to candidate delivery"""
+                
                 if arc[0][1] != 0 and arc[1][1] != 0:
+         
                     stedsnavn1 = index_location[arc[0][1]]
                     stedsnavn2 = index_location[arc[1][1]]
                     distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
@@ -308,8 +318,8 @@ def initialize_Tim():
 T_im = initialize_Tim()
 
 
-A_k1 = {}
-A_k2 = {}
+A_i1 = {}
+A_i2 = {}
 Q_k = {}
 T_k = {}
 
@@ -320,14 +330,17 @@ def add_parameters():
     for drivers in drivers_json:
         T_k[drivers_json[drivers]['id']] = drivers_json[drivers]['max_ride_time'] * 1.5
         Q_k[drivers_json[drivers]['id']] = drivers_json[drivers]['max_capacity']
-        A_k1[drivers_json[drivers]['id'] + nr_passengers * 2 + nr_drivers] = drivers_json[drivers]['lower_tw']
-        A_k2[drivers_json[drivers]['id'] + nr_passengers * 2 + nr_drivers] = drivers_json[drivers]['upper_tw']
+        A_i1[drivers_json[drivers]['id']] = drivers_json[drivers]['lower_tw']
+        A_i2[drivers_json[drivers]['id']] = drivers_json[drivers]['upper_tw']
     for passengers in passengers_json:
         T_k[passengers_json[passengers]['id']] = passengers_json[passengers]['max_ride_time'] * 1.9/1.5
-        A_k1[passengers_json[passengers]['id'] + nr_passengers] = passengers_json[passengers]['lower_tw']
-        A_k2[passengers_json[passengers]['id'] + nr_passengers] = passengers_json[passengers]['upper_tw']
+        A_i1[passengers_json[passengers]['id']] = passengers_json[passengers]['lower_tw']
+        A_i2[passengers_json[passengers]['id']] = passengers_json[passengers]['upper_tw']
 
 add_parameters()
+
+
+print(T_k)
 
 """Helper functions"""
 
@@ -344,3 +357,91 @@ def initialize_big_M():
 
 M = initialize_big_M()
 
+
+
+"""Variables"""
+
+model = Model('RRP')
+
+def set_variables():
+    x_kimjn = model.addVars([(k, i, m, j, n) for k in D for (i, m) in NR for (j, n) in NR], vtype=GRB.BINARY, name='x_kimjn')
+    model.update()
+    xs_kim = model.addVars([(k, i, m) for k in D for (i, m) in NP], vtype=GRB.BINARY, name='xs_kim')
+    model.update()
+    xe_kjn = model.addVars([(k, j, n) for k in D for (j, n) in ND], vtype=GRB.BINARY, name='xe_kjn')
+    model.update()
+    xod_k = model.addVars([k for k in D], vtype=GRB.BINARY, name='xod_k')
+    model.update()
+    y_im = model.addVars([(i, m) for (i, m) in NR if i in PP], vtype=GRB.BINARY, name='y_im')
+    model.update()
+    z_ki = model.addVars([(k, i) for k in D for i in PP], vtype=GRB.BINARY, name='z_ki')
+    model.update()
+    t_kim = model.addVars([(k, i, m) for k in D for (i, m) in NR if i in PP], vtype=GRB.CONTINUOUS, name='t_ki')
+    model.update()
+    return x_kimjn, xs_kim, xe_kjn, xod_k, y_im, z_ki, t_kim
+
+x_kimjn, xs_kim, xe_kjn, xod_k, y_im, z_ki, t_kim = set_variables()
+
+"""Objective"""
+def set_objective1():
+    z1 = model.setObjective(quicksum(z_ki[k, i] for k in D for i in PP), GRB.MAXIMIZE)
+    z2 = model.setObjective(quicksum((t_kim[k, d_k[k]] - (t_kim[k, o_k[k]]) for k in D)) 
+                            + quicksum((t_kim[k, nr_passengers + i, 0] - t_kim[k, i, 0]) for k in D for i in PP), GRB.MINIMIZE)
+    model.update()
+
+"""Constraints"""
+
+
+def add_constraints():
+    '''Routing constraits'''
+    model.addConstrs(quicksum(xs_kim[k, i, m] for (i, m) in NP) + xod_k[k] == 1 for k in D)
+    model.addConstrs(quicksum(xe_kjn[k, j, n] for (j, n) in ND) + xod_k[k] == 1 for k in D)
+
+    model.addConstrs(xs_kim[k, i, m] + quicksum(x_kimjn[k, j, n, i, m] for (j, n) in NP) == quicksum(x_kimjn[k, i, m, j, n] for (j, n) in NR) for k in D for (i, m) in NP)
+    model.addConstrs(xe_kjn[k, j, n] == quicksum(x_kimjn[k, i, m, j, n] for (i,m) in NR) for k in D for (j, n) in ND)
+
+    model.addConstrs(quicksum(xs_kim[k, i, m] for k in D) + quicksum(x_kimjn[k, j, n, i, m] for k in D for (j, n) in NR) - y_im[i, m] == 0 for (i, m) in NP)
+    model.addConstrs(quicksum(y_im[i, m] for m in M_i[i]) <= 1 for i in PP)
+
+    model.addConstrs(quicksum(xs_kim[k, i, m] for m in MP_i[i]) + quicksum(x_kimjn[x, i, m, j, n] for m in MP_i[i] for (j, n) in NR) == z_ki[k, i] for k in D for i in PP)
+
+    model.addConstrs(xod_k[k] <= 1 - z_ki[k, i] for k in D for i in PP)
+
+    """Coupling and precedence constraints"""
+    model.addConstrs(quicksum(x_kimjn[k, i, m, j, n] for (j, n) in NR for m in MP_i[i]) - quicksum(x_kimjn[k, j, n, nr_passengers + i, m] for (j,n) in NR for m in MD_i[i]) == 0 for k in D for i in PP)
+
+    model.addConstrs(t_kim[k, i, m] + T_imjn[i, m, nr_passengers + i, n] - t_kim[k, nr_passengers + i, n] <= 0 for k in D for (i, m) in NP for n in MD_i[o] for o in PP)
+
+    """Time constraint"""
+    model.addConstrs(
+        t_kim[k, i, m] + T_imjn[i, m, j, n] - t_kim[k, j, n] - M[k] *(1 - x_kimjn[k, i, m, j, n]) <= 0 for k in D for (i, m) in NR for (j, n) in NR if ((i, m), (j, n)) in A_k[k])
+    model.addConstrs(
+        t_kim[k, i, m] + T_imjn[i, m, j, n] - t_kim[k, j, n] + M[k] *(1 - x_kimjn[k, i, m, j, n]) >= 0 for k in D for (i, m) in NR for (j, n) in NR if ((i, m), (j, n)) in A_k[k])
+
+    model.addConstrs(
+        t_kim[k, o_k[k]] + T_imjn[o_k[k], i, m] - t_kim[k, i, m] - M[k] *(1 - xs_kim[k, i, m]) <= 0 for k in D for (i, m) in NP)
+    model.addConstrs(
+        t_kim[k, o_k[k]] + T_imjn[o_k[k], i, m] - t_kim[k, i, m] + M[k] *(1 - xs_kim[k, i, m]) >= 0 for k in D for (i, m) in NP)
+
+    model.addConstrs(
+        t_kim[k, i, m] + T_imjn[i, m, d_k[k]] - t_kim[k, d_k[k]] - M[k] *(1 - xe_kjn[k, i, m]) <= 0 for k in D for (i, m) in ND)
+    model.addConstrs(
+        t_kim[k, i, m] + T_imjn[i, m, d_k[k]] - t_kim[k, d_k[k]] + M[k] *(1 - xe_kjn[k, i, m]) >= 0 for k in D for (i, m) in ND)
+
+    model.addConstrs(A_i1[i] <= t_kim[k, nr_passengers + i, n] + T_im[nr_passengers, n] for k in D for i in PP for n in list(MD_i[i]))
+    model.addConstrs(t_kim[k, nr_passengers + i, n] + T_im[nr_passengers, n] <= A_i2[nr_passengers] for k in D for i in PP for n in list(MD_i[i]))
+    
+    model.addConstrs(A_i1[k] <= t_kim[k, d_k(k)] or k in D)
+    model.addConstrs(t_kim[k, d_k(k)] <= A_i2[k]  or k in D)
+
+    disposable1 = model.addConstrs(t_kim[k, nr_passengers + i, 0] - t_kim[k, i, 0] <= T_k[i] for k in D for i in PP)
+    disposable2 = model.addConstrs(t_kim[k, d_k[k]] - t_kim[k, o_k[k]] <= T_k[k] for k in D)
+
+    model.addConstrs(t_kim[k, i, 0] <= t_kim[k, i, m] - (T_im[i, m] * y_im[i, m]) for k in D for i in PP for m in MP_i[i])
+    model.addConstrs(t_kim[k, nr_passengers + i, 0] >= t_kim[k, nr_passengers + i, m] + (T_im[nr_passengers + i, m] * y_im[nr_passengers + i, m]) for k in D for i in PP for m in list(MD_i[i]))
+
+    '''Capacity constraint'''
+    model.addConstrs(quicksum(z_ki[k, i] for i in PP) <= Q_k[k] for k in D)
+
+    model.update()
+    return disposable1, disposable2
