@@ -60,7 +60,7 @@ coordinates = {
     "Tofterøy": (5.05251, 60.18589),
     "Bergenhus": (5.326163, 60.395),
     "Laksevåg": (5.265, 60.379),
-    "Ytrebygda": (5.259, 60291),
+    "Ytrebygda": (5.259, 60.291),
     "Årstad": (5.352, 60.3635)
 }
 
@@ -645,11 +645,9 @@ def visualize():
             arc_sum += T_imjn[(arc[0], arc[1])]
        
 
-
         arcs[k] = from_origin_to_destination + from_origins_arcs + between_ridesharing_arcs + from_delivery_to_destinations
         arcsum[k] = arc_sum
-
-    
+   
 
     return arcs
 
@@ -661,11 +659,11 @@ def run_only_once():
     print("HIHIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
 
     arcs = visualize()
-    plt.show()
+    
     return arcs
     
 
-run_only_once()
+print(run_only_once())
 
 
 
