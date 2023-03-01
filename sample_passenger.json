@@ -1,26 +1,26 @@
 {
   "P2": {
     "id": 2,
-    "origin_location": "Knappskog",
-    "destination_location": "Bergenhus",
-    "lower_tw": 120,
-    "upper_tw": 150,
-    "max_ride_time": 54.0
-  },
-  "P3": {
-    "id": 3,
-    "origin_location": "Ebbesvik",
+    "origin_location": "Telav\u00e5g",
     "destination_location": "Ytrebygda",
     "lower_tw": 120,
     "upper_tw": 150,
-    "max_ride_time": 48.0
+    "max_ride_time": 88.0
+  },
+  "P3": {
+    "id": 3,
+    "origin_location": "Hammarsland",
+    "destination_location": "Bergenhus",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 74.0
   },
   "P4": {
     "id": 4,
-    "origin_location": "Spjeld",
+    "origin_location": "Knarrevik",
     "destination_location": "\u00c5rstad",
     "lower_tw": 120,
     "upper_tw": 150,
-    "max_ride_time": 58.0
+    "max_ride_time": 38.0
   }
 }

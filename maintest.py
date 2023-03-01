@@ -57,7 +57,11 @@ coordinates = {
     "Rongøy": (4.915516, 60.507616),
     "Hammersland": (5.068799, 60.25957),
     "Træsneset": (5.067745, 60.227445),
-    "Tofterøy": (5.05251, 60.18589)
+    "Tofterøy": (5.05251, 60.18589),
+    "Bergenhus": (5.326163, 60.395),
+    "Laksevåg": (5.265, 60.379),
+    "Ytrebygda": (5.259, 60291),
+    "Årstad": (5.352, 60.3635)
 }
 
 
@@ -527,7 +531,7 @@ def debug():
 
     
 
-
+print(o_k)
 
 def visualize():
     arcs = {}
@@ -536,8 +540,8 @@ def visualize():
     for k in D:
         from_origins_arcs = [a for a in A_k[k] if (a[1]) in NP and (a[0][0]) in D and xs_kim[k, a[1][0], a[1][1]].x > 0.99]
         between_ridesharing_arcs = [a for a in A_k[k] if (a[0]) in NR and (a[1]) in NR and x_kimjn[k, a[0][0], a[0][1], a[1][0], a[1][1]].x > 0.99]
-        from_delivery_to_destinations = [a for a in A_k[k] if (a[0]) in ND and xe_kjn[k, a[0][0], a[0][1]].x > 0.99]
-        from_origin_to_destination = [a for a in A_k[k] if (a[0]) in o_k[k] and (a[1]) in d_k[k] and xod_k[k].x > 0.99]
+        from_delivery_to_destinations = [a for a in A_k[k] if (a[0]) in ND and (a[1]) == d_k[k] and xe_kjn[k, a[0][0], a[0][1]].x > 0.99]
+        from_origin_to_destination = [a for a in A_k[k] if a[0][0] == k and a[1][0] == d_k[k][0] and xod_k[k].x > 0.99]
 
         print(from_origins_arcs)
         print(from_origin_to_destination)
@@ -584,10 +588,11 @@ def visualize():
             """Between pick up and delivery nodes"""
             if arc[0][0] in PP and arc[1][0] in PD:
                 """Between origin and destination"""
-                
                 if arc[0][1] == 0 and arc[1][1] == 0:      
                     stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
                     stedsnavn2 = passengers_json["P" + str(arc[1][0] - nr_passengers)]["destination_location"]
+                    print(arc, stedsnavn1, stedsnavn2)
+        
                     plt.plot([coordinates[stedsnavn1][0], coordinates[stedsnavn1][1]], [coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]], c='g', zorder=0)
 
                 """From origin to candidate delivery (Ingen candidate deliveries atm) """
@@ -611,7 +616,7 @@ def visualize():
 
         for arc in from_delivery_to_destinations:
             """From candidate delivery to driver destination"""
-            if arc[0][0] in PD and arc[1][0] in d_k[driver]:
+            if arc[0][0] in PD and arc[1][0] in d_k[k]:
                 """Between passenger destinations and driver destination"""
                 if arc[0][1] == 0 and arc[1][1] == 0:      
                     stedsnavn1 = passengers_json["P" + str(arc[0][0] - nr_passengers)]["destination_location"]
@@ -652,12 +657,12 @@ def run_only_once():
     optimize()
     print("HIHIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
     print(model.objVal)
-    #print(x_kimjn.select())
+    print(xod_k.select())
     print("HIHIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
 
-    arcs, path, picked_up = visualize()
+    arcs = visualize()
     plt.show()
-    return arcs, picked_up
+    return arcs
     
 
 run_only_once()
