@@ -1,20 +1,20 @@
 {
   "D0": {
     "id": 0,
-    "origin_location": "K\u00e5rtveit",
+    "origin_location": "Foldnes",
     "destination_location": "Laksev\u00e5g",
     "lower_tw": 120,
     "upper_tw": 150,
-    "max_ride_time": 52.0,
+    "max_ride_time": 40.0,
     "max_capacity": 4.0
   },
   "D1": {
     "id": 1,
-    "origin_location": "Knarrevik",
+    "origin_location": "Landro",
     "destination_location": "Laksev\u00e5g",
     "lower_tw": 120,
     "upper_tw": 150,
-    "max_ride_time": 22.0,
+    "max_ride_time": 58.0,
     "max_capacity": 4.0
   }
 }

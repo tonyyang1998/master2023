@@ -98,6 +98,10 @@ d_k = {k:(k + 2*nr_passengers + nr_drivers, 0) for k in D}
 driver_origin_nodes = {k: o_k[k] for k in D}
 driver_destination_nodes = {k: d_k[k] for k in D}
 
+
+N = list(driver_origin_nodes.values()) + NR + list(driver_destination_nodes.values())
+
+
 def initialize_Ak():
     result = {}
     Ak = {k: [((i,m),(j,n)) for (i,m) in NR + [o_k[k]] for (j,n) in NR + [d_k[k]] if ((i,m)!=(j,n))] for k in D}
@@ -125,12 +129,15 @@ def initialize_Ak():
 
 A_k = initialize_Ak()
 
+
 def initialize_Timjn():
     """IKKE ferdig"""
     T_imjn = {}
+   
     for driver in A_k:
         for arc in A_k[driver]:
             """Between driver origin and and destination"""
+           
             if arc[0][0] in D and arc[1][0] in d_k[driver]:
                 stedsnavn1 = drivers_json["D" + str(arc[0][0])]["origin_location"]
                 stedsnavn2 = drivers_json["D" + str(arc[0][0])]["destination_location"]
@@ -140,6 +147,7 @@ def initialize_Timjn():
             """Between driver origin and all pick up candidate locations """
             if arc[0][0] in D and arc[1][0] in PP:
                 """If pick up node is (j, x)"""
+                
                 if arc[1][1]!=0:
                     stedsnavn1 = drivers_json["D" + str(arc[0][0])]["origin_location"]
                     stedsnavn2 = index_location[arc[1][1]]
@@ -253,9 +261,10 @@ def initialize_Timjn():
                     stedsnavn2 = drivers_json["D" + str(arc[1][0] - nr_drivers - 2*nr_passengers)]["destination_location"]
                     distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
                     T_imjn[arc] = distance
-        return T_imjn
+    return T_imjn
 
 T_imjn = initialize_Timjn()
+
 
 def initialize_Tim():
     Tim = {}
@@ -340,7 +349,8 @@ def add_parameters():
 add_parameters()
 
 
-print(T_k)
+
+
 
 """Helper functions"""
 
@@ -372,17 +382,17 @@ def set_variables():
     model.update()
     xod_k = model.addVars([k for k in D], vtype=GRB.BINARY, name='xod_k')
     model.update()
-    y_im = model.addVars([(i, m) for (i, m) in NR if i in PP], vtype=GRB.BINARY, name='y_im')
+    y_im = model.addVars([(i, m) for (i, m) in NR], vtype=GRB.BINARY, name='y_im')
     model.update()
     z_ki = model.addVars([(k, i) for k in D for i in PP], vtype=GRB.BINARY, name='z_ki')
     model.update()
-    t_kim = model.addVars([(k, i, m) for k in D for (i, m) in NR if i in PP], vtype=GRB.CONTINUOUS, name='t_ki')
+    t_kim = model.addVars([(k, i, m) for k in D for (i, m) in N], vtype=GRB.CONTINUOUS, name='t_ki')
     model.update()
     return x_kimjn, xs_kim, xe_kjn, xod_k, y_im, z_ki, t_kim
 
 x_kimjn, xs_kim, xe_kjn, xod_k, y_im, z_ki, t_kim = set_variables()
 
-print(NR)
+#print(t_kim)
 
 """Objective"""
 def set_objective():
@@ -408,33 +418,32 @@ def add_constraints():
     model.addConstrs(quicksum(xs_kim[k, i, m] for k in D) + quicksum(x_kimjn[k, j, n, i, m] for k in D for (j, n) in NR) - y_im[i, m] == 0 for (i, m) in NP)
     model.addConstrs(quicksum(y_im[i, m] for m in M_i[i]) <= 1 for i in PP)
 
-    model.addConstrs(quicksum(xs_kim[k, i, m] for m in MP_i[i]) + quicksum(x_kimjn[x, i, m, j, n] for m in MP_i[i] for (j, n) in NR) == z_ki[k, i] for k in D for i in PP)
+    model.addConstrs(quicksum(xs_kim[k, i, m] for m in MP_i[i]) + quicksum(x_kimjn[k, i, m, j, n] for m in MP_i[i] for (j, n) in NR) == z_ki[k, i] for k in D for i in PP)
 
     model.addConstrs(xod_k[k] <= 1 - z_ki[k, i] for k in D for i in PP)
 
     """Coupling and precedence constraints"""
-    model.addConstrs(quicksum(x_kimjn[k, i, m, j, n] for (j, n) in NR for m in MP_i[i]) - quicksum(x_kimjn[k, j, n, nr_passengers + i, m] for (j,n) in NR for m in MD_i[i]) == 0 for k in D for i in PP)
-
-    model.addConstrs(t_kim[k, i, m] + T_imjn[i, m, nr_passengers + i, n] - t_kim[k, nr_passengers + i, n] <= 0 for k in D for (i, m) in NP for n in MD_i[o] for o in PP)
+    model.addConstrs(quicksum(x_kimjn[k, i, m, j, n] for (j, n) in NR for m in MP_i[i]) - quicksum(x_kimjn[k, j, n, nr_passengers + i, m] for (j,n) in NR for m in [MD_i[i]]) == 0 for k in D for i in PP)
+    model.addConstrs(t_kim[k, i, m] + T_imjn[(i, m), (nr_passengers + i, n)] - t_kim[k, nr_passengers + i, n] <= 0 for k in D for (i, m) in NP for o in PP for n in [MD_i[o]])
 
     """Time constraint"""
     model.addConstrs(
-        t_kim[k, i, m] + T_imjn[i, m, j, n] - t_kim[k, j, n] - M[k] *(1 - x_kimjn[k, i, m, j, n]) <= 0 for k in D for (i, m) in NR for (j, n) in NR if ((i, m), (j, n)) in A_k[k])
+        t_kim[k, i, m] + T_imjn[(i, m), (j, n)] - t_kim[k, j, n] - M[k] *(1 - x_kimjn[k, i, m, j, n]) <= 0 for k in D for (i, m) in NR for (j, n) in NR if ((i, m), (j, n)) in A_k[k])
     model.addConstrs(
-        t_kim[k, i, m] + T_imjn[i, m, j, n] - t_kim[k, j, n] + M[k] *(1 - x_kimjn[k, i, m, j, n]) >= 0 for k in D for (i, m) in NR for (j, n) in NR if ((i, m), (j, n)) in A_k[k])
+        t_kim[k, i, m] + T_imjn[(i, m), (j, n)] - t_kim[k, j, n] + M[k] *(1 - x_kimjn[k, i, m, j, n]) >= 0 for k in D for (i, m) in NR for (j, n) in NR if ((i, m), (j, n)) in A_k[k])
 
     model.addConstrs(
-        t_kim[k, o_k[k][0], o_k[k][1]] + T_imjn[o_k[k][0],o_k[k][1], i, m] - t_kim[k, i, m] - M[k] *(1 - xs_kim[k, i, m]) <= 0 for k in D for (i, m) in NP)
+        t_kim[k, o_k[k][0], o_k[k][1]] + T_imjn[(o_k[k][0],o_k[k][1]), (i, m)] - t_kim[k, i, m] - M[k] *(1 - xs_kim[k, i, m]) <= 0 for k in D for (i, m) in NP)
     model.addConstrs(
-        t_kim[k, o_k[k][0], o_k[k][1]] + T_imjn[o_k[k][0],o_k[k][1], i, m] - t_kim[k, i, m] + M[k] *(1 - xs_kim[k, i, m]) >= 0 for k in D for (i, m) in NP)
+        t_kim[k, o_k[k][0], o_k[k][1]] + T_imjn[(o_k[k][0],o_k[k][1]), (i, m)] - t_kim[k, i, m] + M[k] *(1 - xs_kim[k, i, m]) >= 0 for k in D for (i, m) in NP)
 
     model.addConstrs(
-        t_kim[k, i, m] + T_imjn[i, m, d_k[k][0], d_k[k][1]] - t_kim[k, d_k[k][0], d_k[k][1]] - M[k] *(1 - xe_kjn[k, i, m]) <= 0 for k in D for (i, m) in ND)
+        t_kim[k, i, m] + T_imjn[(i, m), (d_k[k][0], d_k[k][1])] - t_kim[k, d_k[k][0], d_k[k][1]] - M[k] *(1 - xe_kjn[k, i, m]) <= 0 for k in D for (i, m) in ND)
     model.addConstrs(
-        t_kim[k, i, m] + T_imjn[i, m, d_k[k][0], d_k[k][1]] - t_kim[k, d_k[k][0], d_k[k][1]] + M[k] *(1 - xe_kjn[k, i, m]) >= 0 for k in D for (i, m) in ND)
+        t_kim[k, i, m] + T_imjn[(i, m), (d_k[k][0], d_k[k][1])] - t_kim[k, d_k[k][0], d_k[k][1]] + M[k] *(1 - xe_kjn[k, i, m]) >= 0 for k in D for (i, m) in ND)
 
-    model.addConstrs(A_i1[i] <= t_kim[k, nr_passengers + i, n] + T_im[nr_passengers, n] for k in D for i in PP for n in list(MD_i[i]))
-    model.addConstrs(t_kim[k, nr_passengers + i, n] + T_im[nr_passengers, n] <= A_i2[nr_passengers] for k in D for i in PP for n in list(MD_i[i]))
+    model.addConstrs(A_i1[i] <= t_kim[k, nr_passengers + i, n] + T_im[nr_passengers, n] for k in D for i in PP for n in [MD_i[i]])
+    model.addConstrs(t_kim[k, nr_passengers + i, n] + T_im[nr_passengers, n] <= A_i2[nr_passengers] for k in D for i in PP for n in [MD_i[i]])
     
     model.addConstrs(A_i1[k] <= t_kim[k, d_k[k][0], d_k[k][1]] for k in D)
     model.addConstrs(t_kim[k, d_k[k][0], d_k[k][1]] <= A_i2[k] for k in D)
@@ -443,7 +452,10 @@ def add_constraints():
     disposable2 = model.addConstrs(t_kim[k, d_k[k][0], d_k[k][1]] - t_kim[k, o_k[k][0], o_k[k][1]] <= T_k[k] for k in D)
 
     model.addConstrs(t_kim[k, i, 0] <= t_kim[k, i, m] - (T_im[i, m] * y_im[i, m]) for k in D for i in PP for m in MP_i[i])
-    model.addConstrs(t_kim[k, nr_passengers + i, 0] >= t_kim[k, nr_passengers + i, m] + (T_im[nr_passengers + i, m] * y_im[nr_passengers + i, m]) for k in D for i in PP for m in list(MD_i[i]))
+
+    print(T_im)
+    print(y_im)
+    model.addConstrs(t_kim[k, nr_passengers + i, 0] >= t_kim[k, nr_passengers + i, m] + (T_im[nr_passengers + i, m] * y_im[nr_passengers + i, m]) for k in D for i in PP for m in [MD_i[i]])
 
     '''Capacity constraint'''
     model.addConstrs(quicksum(z_ki[k, i] for i in PP) <= Q_k[k] for k in D)
