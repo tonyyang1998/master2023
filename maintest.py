@@ -382,12 +382,17 @@ def set_variables():
 
 x_kimjn, xs_kim, xe_kjn, xod_k, y_im, z_ki, t_kim = set_variables()
 
+print(NR)
+
 """Objective"""
-def set_objective1():
-    z1 = model.setObjective(quicksum(z_ki[k, i] for k in D for i in PP), GRB.MAXIMIZE)
-    z2 = model.setObjective(quicksum((t_kim[k, d_k[k]] - (t_kim[k, o_k[k]]) for k in D)) 
-                            + quicksum((t_kim[k, nr_passengers + i, 0] - t_kim[k, i, 0]) for k in D for i in PP), GRB.MINIMIZE)
+def set_objective():
+    model.ModelSense = GRB.MAXIMIZE
+    model.setObjectiveN(quicksum(z_ki[k, i] for k in D for i in PP), index = 0, priority = 1)
+    model.setObjectiveN(- quicksum((t_kim[k, d_k[k][0], d_k[k][1]] - (t_kim[k, o_k[k][0], o_k[k][1]]) for k in D)) - quicksum((t_kim[k, nr_passengers + i, 0] - t_kim[k, i, 0]) for k in D for i in PP), index = 1, priority = 0)
     model.update()
+
+set_objective()
+
 
 """Constraints"""
 
@@ -419,23 +424,23 @@ def add_constraints():
         t_kim[k, i, m] + T_imjn[i, m, j, n] - t_kim[k, j, n] + M[k] *(1 - x_kimjn[k, i, m, j, n]) >= 0 for k in D for (i, m) in NR for (j, n) in NR if ((i, m), (j, n)) in A_k[k])
 
     model.addConstrs(
-        t_kim[k, o_k[k]] + T_imjn[o_k[k], i, m] - t_kim[k, i, m] - M[k] *(1 - xs_kim[k, i, m]) <= 0 for k in D for (i, m) in NP)
+        t_kim[k, o_k[k][0], o_k[k][1]] + T_imjn[o_k[k][0],o_k[k][1], i, m] - t_kim[k, i, m] - M[k] *(1 - xs_kim[k, i, m]) <= 0 for k in D for (i, m) in NP)
     model.addConstrs(
-        t_kim[k, o_k[k]] + T_imjn[o_k[k], i, m] - t_kim[k, i, m] + M[k] *(1 - xs_kim[k, i, m]) >= 0 for k in D for (i, m) in NP)
+        t_kim[k, o_k[k][0], o_k[k][1]] + T_imjn[o_k[k][0],o_k[k][1], i, m] - t_kim[k, i, m] + M[k] *(1 - xs_kim[k, i, m]) >= 0 for k in D for (i, m) in NP)
 
     model.addConstrs(
-        t_kim[k, i, m] + T_imjn[i, m, d_k[k]] - t_kim[k, d_k[k]] - M[k] *(1 - xe_kjn[k, i, m]) <= 0 for k in D for (i, m) in ND)
+        t_kim[k, i, m] + T_imjn[i, m, d_k[k][0], d_k[k][1]] - t_kim[k, d_k[k][0], d_k[k][1]] - M[k] *(1 - xe_kjn[k, i, m]) <= 0 for k in D for (i, m) in ND)
     model.addConstrs(
-        t_kim[k, i, m] + T_imjn[i, m, d_k[k]] - t_kim[k, d_k[k]] + M[k] *(1 - xe_kjn[k, i, m]) >= 0 for k in D for (i, m) in ND)
+        t_kim[k, i, m] + T_imjn[i, m, d_k[k][0], d_k[k][1]] - t_kim[k, d_k[k][0], d_k[k][1]] + M[k] *(1 - xe_kjn[k, i, m]) >= 0 for k in D for (i, m) in ND)
 
     model.addConstrs(A_i1[i] <= t_kim[k, nr_passengers + i, n] + T_im[nr_passengers, n] for k in D for i in PP for n in list(MD_i[i]))
     model.addConstrs(t_kim[k, nr_passengers + i, n] + T_im[nr_passengers, n] <= A_i2[nr_passengers] for k in D for i in PP for n in list(MD_i[i]))
     
-    model.addConstrs(A_i1[k] <= t_kim[k, d_k(k)] or k in D)
-    model.addConstrs(t_kim[k, d_k(k)] <= A_i2[k]  or k in D)
+    model.addConstrs(A_i1[k] <= t_kim[k, d_k[k][0], d_k[k][1]] for k in D)
+    model.addConstrs(t_kim[k, d_k[k][0], d_k[k][1]] <= A_i2[k] for k in D)
 
     disposable1 = model.addConstrs(t_kim[k, nr_passengers + i, 0] - t_kim[k, i, 0] <= T_k[i] for k in D for i in PP)
-    disposable2 = model.addConstrs(t_kim[k, d_k[k]] - t_kim[k, o_k[k]] <= T_k[k] for k in D)
+    disposable2 = model.addConstrs(t_kim[k, d_k[k][0], d_k[k][1]] - t_kim[k, o_k[k][0], o_k[k][1]] <= T_k[k] for k in D)
 
     model.addConstrs(t_kim[k, i, 0] <= t_kim[k, i, m] - (T_im[i, m] * y_im[i, m]) for k in D for i in PP for m in MP_i[i])
     model.addConstrs(t_kim[k, nr_passengers + i, 0] >= t_kim[k, nr_passengers + i, m] + (T_im[nr_passengers + i, m] * y_im[nr_passengers + i, m]) for k in D for i in PP for m in list(MD_i[i]))
@@ -445,3 +450,45 @@ def add_constraints():
 
     model.update()
     return disposable1, disposable2
+
+
+"""Optimize"""
+def optimize():
+    model.setParam('TimeLimit', 3600)
+    add_constraints()
+    model.optimize(my_callback)
+
+
+result_solution = []
+result_bound = []
+result_time = []
+
+def my_callback(model, where):
+    
+    if where == GRB.Callback.MIP:
+        current_best = model.cbGet(GRB.Callback.MIP_OBJBST)
+        current_bound = model.cbGet(GRB.Callback.MIP_OBJBND)
+        runtime = model.cbGet(GRB.Callback.RUNTIME)
+        if current_best not in result_solution:
+            if current_best<0:
+                result_solution.append(0)
+            else:
+                result_solution.append(current_best)
+                result_bound.append(current_bound)
+                result_time.append(runtime)
+        if current_bound not in result_bound:
+            result_solution.append(current_best)
+            result_bound.append(current_bound)
+            result_time.append(runtime)
+
+def debug():
+    model.computeIIS()
+    model.write('model.MPS')
+    model.write('model.lp')
+    model.write('model.ilp')
+
+
+def run_only_once():
+    optimize()
+
+run_only_once()
