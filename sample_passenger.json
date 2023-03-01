@@ -1,26 +1,26 @@
 {
   "P2": {
     "id": 2,
-    "origin_location": "K\u00e5rtveit",
-    "destination_location": "Laksev\u00e5g",
+    "origin_location": "Tofter\u00f8y",
+    "destination_location": "Ytrebygda",
     "lower_tw": 120,
     "upper_tw": 150,
-    "max_ride_time": 52.0
+    "max_ride_time": 96.0
   },
   "P3": {
     "id": 3,
-    "origin_location": "Telav\u00e5g",
+    "origin_location": "Knarrevik",
     "destination_location": "Bergenhus",
     "lower_tw": 120,
     "upper_tw": 150,
-    "max_ride_time": 94.0
+    "max_ride_time": 36.0
   },
   "P4": {
     "id": 4,
-    "origin_location": "Hjelteryggen",
+    "origin_location": "Brattholmen",
     "destination_location": "Bergenhus",
     "lower_tw": 120,
     "upper_tw": 150,
-    "max_ride_time": 42.0
+    "max_ride_time": 48.0
   }
 }
