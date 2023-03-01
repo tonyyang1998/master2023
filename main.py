@@ -395,7 +395,6 @@ def optimize():
     model.optimize(my_callback)
 
 
-
 result_solution = []
 result_bound = []
 result_time = []

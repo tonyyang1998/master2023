@@ -34,6 +34,33 @@ P = PP + PD
 location_index = {"Knappskog": 1, "Kolltveit":2, "Blomøy":3, "Hellesøy":4, "Foldnes":5,"Brattholmen":6,"Arefjord":7, "Ebbesvik":8,"Straume":9,"Spjeld":10,"Landro":11, "Knarrevik":12,"Hjelteryggen":13,"Skogsvåg":14,"Kleppestø":15,"Solsvik":16,"Rongøy":17,"Hammarsland":18,"Telavåg":19,"Træsneset":20,"Tofterøy":21,"Bildøyna":22,"Kårtveit":23, "Bergenshus":24, "Laksevåg":25, "Ytrebydga":26, "Årstad": 27}
 index_location = {y: x for x, y in location_index.items()}
 
+coordinates = {
+    "Knappskog": (5.055929, 60.382878),
+    "Kolltveit": (5.087813, 60.352223),
+    "Kårtveit": (4.993453, 60.388651),
+    "Telavåg": (4.982022, 60.261564),
+    "Straume": (5.121333, 60.356561),
+    "Knarrevik": (5.153025, 60.368083),
+    "Bildøyna": (5.106085, 60.354085),
+    "Spjeld": (5.039608, 60.390343),
+    "Foldnes": (5.106568, 60.375988),
+    "Brattholmen": (5.152274, 60.354616),
+    "Blomøy": (4.892748, 60.538108),
+    "Hellesøy": (4.790867, 60.661021),
+    "Arefjord": (5.142463, 60.358855),
+    "Ebbesvik": (5.140128, 60.336068),
+    "Landro": (4.967209, 60.423365),
+    "Hjelteryggen": (5.154482, 60.381361),
+    "Skogsvåg": (5.097186, 60.25994),
+    "Kleppestø": (5.135965, 60.18781),
+    "Solsvik": (4.966409, 60.431002),
+    "Rongøy": (4.915516, 60.507616),
+    "Hammersland": (5.068799, 60.25957),
+    "Træsneset": (5.067745, 60.227445),
+    "Tofterøy": (5.05251, 60.18589)
+}
+
+
 def passenger_candidate_pickup_location_initialization():
     all_location_pairs = distance_matrix.distance_matrix.keys()
     result = {}
@@ -373,6 +400,7 @@ M = initialize_big_M()
 
 model = Model('RRP')
 
+
 def set_variables():
     x_kimjn = model.addVars([(k, i, m, j, n) for k in D for (i, m) in NR for (j, n) in NR], vtype=GRB.BINARY, name='x_kimjn')
     model.update()
@@ -392,7 +420,6 @@ def set_variables():
 
 x_kimjn, xs_kim, xe_kjn, xod_k, y_im, z_ki, t_kim = set_variables()
 
-#print(t_kim)
 
 """Objective"""
 def set_objective():
@@ -453,8 +480,7 @@ def add_constraints():
 
     model.addConstrs(t_kim[k, i, 0] <= t_kim[k, i, m] - (T_im[i, m] * y_im[i, m]) for k in D for i in PP for m in MP_i[i])
 
-    print(T_im)
-    print(y_im)
+  
     model.addConstrs(t_kim[k, nr_passengers + i, 0] >= t_kim[k, nr_passengers + i, m] + (T_im[nr_passengers + i, m] * y_im[nr_passengers + i, m]) for k in D for i in PP for m in [MD_i[i]])
 
     '''Capacity constraint'''
@@ -499,8 +525,142 @@ def debug():
     model.write('model.lp')
     model.write('model.ilp')
 
+    
+
+
+
+def visualize():
+    arcs = {}
+    arcsum = {}
+    plt.figure(1)
+    for k in D:
+        from_origins_arcs = [a for a in A_k[k] if (a[1]) in NP and (a[0][0]) in D and xs_kim[k, a[1][0], a[1][1]].x > 0.99]
+        between_ridesharing_arcs = [a for a in A_k[k] if (a[0]) in NR and (a[1]) in NR and x_kimjn[k, a[0][0], a[0][1], a[1][0], a[1][1]].x > 0.99]
+        from_delivery_to_destinations = [a for a in A_k[k] if (a[0]) in ND and xe_kjn[k, a[0][0], a[0][1]].x > 0.99]
+        from_origin_to_destination = [a for a in A_k[k] if (a[0]) in o_k[k] and (a[1]) in d_k[k] and xod_k[k].x > 0.99]
+
+        print(from_origins_arcs)
+        print(from_origin_to_destination)
+        print(between_ridesharing_arcs)
+        print(from_delivery_to_destinations)
+
+        arc_sum = 0
+        
+        for arc in from_origins_arcs:
+            if arc[1][1]!=0:
+                stedsnavn1 = drivers_json["D" + str(k)]["origin_location"]
+                stedsnavn2 = index_location[arc[1][1]]
+                plt.plot([coordinates[stedsnavn1][0], coordinates[stedsnavn1][1]], [coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]], c='g', zorder=0)
+            else:
+                """If pick up node is (j, 0)""" 
+                stedsnavn1 = drivers_json["D" + str(k)]["origin_location"]
+                stedsnavn2 = passengers_json["P" + str(arc[1][0])]["origin_location"]
+                plt.plot([coordinates[stedsnavn1][0], coordinates[stedsnavn1][1]], [coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]], c='g', zorder=0)
+
+        for arc in between_ridesharing_arcs:
+            if arc[0][0] in PP and arc[1][0] in PP:
+                """Between origins"""
+                if arc[0][1] == 0 and arc[1][1] == 0:      
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
+                    stedsnavn2 = passengers_json["P" + str(arc[1][0])]["origin_location"]
+                    plt.plot([coordinates[stedsnavn1][0], coordinates[stedsnavn1][1]], [coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]], c='g', zorder=0)
+                """From origin to candidate pick up """
+                if arc[0][1] == 0 and arc[1][1] != 0:
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
+                    stedsnavn2 = index_location[arc[1][1]]
+                    plt.plot([coordinates[stedsnavn1][0], coordinates[stedsnavn1][1]], [coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]], c='g', zorder=0)
+
+                """Between candidate pick ups"""
+                if arc[0][1] != 0 and arc[1][1] != 0:
+                    stedsnavn1 = index_location[arc[0][1]]
+                    stedsnavn2 = index_location[arc[1][1]]
+                    plt.plot([coordinates[stedsnavn1][0], coordinates[stedsnavn1][1]], [coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]], c='g', zorder=0)
+                """From candidate pick up to origin"""
+                if arc[0][1] != 0 and arc[1][1] == 0:
+                    stedsnavn1 = index_location[arc[0][1]]
+                    stedsnavn2 = passengers_json["P" + str(arc[1][0])]["origin_location"]
+                    plt.plot([coordinates[stedsnavn1][0], coordinates[stedsnavn1][1]], [coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]], c='g', zorder=0)
+
+            """Between pick up and delivery nodes"""
+            if arc[0][0] in PP and arc[1][0] in PD:
+                """Between origin and destination"""
+                
+                if arc[0][1] == 0 and arc[1][1] == 0:      
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
+                    stedsnavn2 = passengers_json["P" + str(arc[1][0] - nr_passengers)]["destination_location"]
+                    plt.plot([coordinates[stedsnavn1][0], coordinates[stedsnavn1][1]], [coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]], c='g', zorder=0)
+
+                """From origin to candidate delivery (Ingen candidate deliveries atm) """
+                if arc[0][1] == 0 and arc[1][1] != 0:
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
+                    stedsnavn2 = index_location[arc[1][1]]
+                    plt.plot([coordinates[stedsnavn1][0], coordinates[stedsnavn1][1]], [coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]], c='g', zorder=0)
+
+                """Between candidate pick up to candidate delivery"""
+                if arc[0][1] != 0 and arc[1][1] != 0:
+                    stedsnavn1 = index_location[arc[0][1]]
+                    stedsnavn2 = index_location[arc[1][1]]
+                    plt.plot([coordinates[stedsnavn1][0], coordinates[stedsnavn1][1]], [coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]], c='g', zorder=0)
+
+                """From candidate pick up to destination"""
+                if arc[0][1] != 0 and arc[1][1] == 0:
+                    stedsnavn1 = index_location[arc[0][1]]
+                    stedsnavn2 = passengers_json["P" + str(arc[1][0] - nr_passengers)]["destination_location"]
+                    plt.plot([coordinates[stedsnavn1][0], coordinates[stedsnavn1][1]], [coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]], c='g', zorder=0)
+
+
+        for arc in from_delivery_to_destinations:
+            """From candidate delivery to driver destination"""
+            if arc[0][0] in PD and arc[1][0] in d_k[driver]:
+                """Between passenger destinations and driver destination"""
+                if arc[0][1] == 0 and arc[1][1] == 0:      
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0] - nr_passengers)]["destination_location"]
+                    stedsnavn2 = drivers_json["D" + str(arc[1][0] - nr_drivers - 2*nr_passengers)]["destination_location"]
+                    plt.plot([coordinates[stedsnavn1][0], coordinates[stedsnavn1][1]], [coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]], c='g', zorder=0)
+
+                """From candidate delivery to driver destination"""
+                if arc[0][1] != 0 and arc[1][1] == 0:
+                    stedsnavn1 = index_location[arc[0][1]]
+                    stedsnavn2 = drivers_json["D" + str(arc[1][0] - nr_drivers - 2*nr_passengers)]["destination_location"]
+                    plt.plot([coordinates[stedsnavn1][0], coordinates[stedsnavn1][1]], [coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]], c='g', zorder=0)
+        
+        for arc in from_origin_to_destination:
+            stedsnavn1 = drivers_json["D" + str(arc[0][0])]["origin_location"]
+            stedsnavn2 = drivers_json["D" + str(arc[1][0] - nr_drivers - 2*nr_passengers)]["destination_location"]
+            plt.plot([coordinates[stedsnavn1][0], coordinates[stedsnavn1][1]], [coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]], c='g', zorder=0)
+
+
+        for arc in from_origins_arcs:
+            arc_sum += T_imjn[(arc[0], arc[1])]
+        for arc in from_origin_to_destination:
+            arc_sum += T_imjn[(arc[0], arc[1])]
+        for arc in between_ridesharing_arcs:
+            arc_sum += T_imjn[(arc[0], arc[1])]
+        for arc in from_delivery_to_destinations:
+            arc_sum += T_imjn[(arc[0], arc[1])]
+       
+
+
+        arcs[k] = from_origin_to_destination + from_origins_arcs + between_ridesharing_arcs + from_delivery_to_destinations
+        arcsum[k] = arc_sum
+
+    
+
+    return arcs
 
 def run_only_once():
     optimize()
+    print("HIHIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
+    print(model.objVal)
+    #print(x_kimjn.select())
+    print("HIHIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
+
+    arcs, path, picked_up = visualize()
+    plt.show()
+    return arcs, picked_up
+    
 
 run_only_once()
+
+
+
