@@ -161,15 +161,14 @@ def initialize_Ak():
 A_k = initialize_Ak()
 
 
+
 def initialize_Timjn():
-    """IKKE ferdig"""
     T_imjn = {}
    
     for driver in A_k:
         for arc in A_k[driver]:
             """Between driver origin and and destination"""
-           
-            if arc[0][0] in D and arc[1][0] in d_k[driver]:
+            if arc[0] == o_k[driver] and arc[1] == d_k[driver]:
                 stedsnavn1 = drivers_json["D" + str(arc[0][0])]["origin_location"]
                 stedsnavn2 = drivers_json["D" + str(arc[0][0])]["destination_location"]
                 distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
@@ -381,8 +380,6 @@ add_parameters()
 
 
 
-
-
 """Helper functions"""
 
 delivery_and_pickup_node_pairs = {PD[i]: PP[i] for i in range(len(PD))}
@@ -406,7 +403,7 @@ model = Model('RRP')
 
 
 def set_variables():
-    x_kimjn = model.addVars([(k, i, m, j, n) for k in D for (i, m) in NR for (j, n) in NR], vtype=GRB.BINARY, name='x_kimjn')
+    x_kimjn = model.addVars([(k, i, m, j, n) for k in D for (i, m) in NR for (j, n) in NR if ((i, m), (j,n)) in A_k[k]], vtype=GRB.BINARY, name='x_kimjn')
     model.update()
     xs_kim = model.addVars([(k, i, m) for k in D for (i, m) in NP], vtype=GRB.BINARY, name='xs_kim')
     model.update()
@@ -428,8 +425,9 @@ x_kimjn, xs_kim, xe_kjn, xod_k, y_im, z_ki, t_kim = set_variables()
 """Objective"""
 def set_objective():
     model.ModelSense = GRB.MAXIMIZE
-    model.setObjectiveN(quicksum(z_ki[k, i] for k in D for i in PP), index = 0, priority = 1)
-    model.setObjectiveN(- quicksum((t_kim[k, d_k[k][0], d_k[k][1]] - (t_kim[k, o_k[k][0], o_k[k][1]]) for k in D)) - quicksum((t_kim[k, nr_passengers + i, 0] - t_kim[k, i, 0]) for k in D for i in PP), index = 1, priority = 0)
+    model.setObjective(quicksum(z_ki[k, i] for k in D for i in PP))
+    #model.setObjectiveN(quicksum(z_ki[k, i] for k in D for i in PP), index = 0, priority = 1)
+    #model.setObjectiveN(- quicksum((t_kim[k, d_k[k][0], d_k[k][1]] - (t_kim[k, o_k[k][0], o_k[k][1]]) for k in D)) - quicksum((t_kim[k, nr_passengers + i, 0] - t_kim[k, i, 0]) for k in D for i in PP), index = 1, priority = 0)
     model.update()
 
 set_objective()
@@ -443,18 +441,26 @@ def add_constraints():
     model.addConstrs(quicksum(xs_kim[k, i, m] for (i, m) in NP) + xod_k[k] == 1 for k in D)
     model.addConstrs(quicksum(xe_kjn[k, j, n] for (j, n) in ND) + xod_k[k] == 1 for k in D)
 
-    model.addConstrs(xs_kim[k, i, m] + quicksum(x_kimjn[k, j, n, i, m] for (j, n) in NP) == quicksum(x_kimjn[k, i, m, j, n] for (j, n) in NR) for k in D for (i, m) in NP)
-    model.addConstrs(xe_kjn[k, j, n] == quicksum(x_kimjn[k, i, m, j, n] for (i,m) in NR) for k in D for (j, n) in ND)
+    model.addConstrs(xs_kim[k, i, m] + quicksum(x_kimjn[k, j, n, i, m] for (j, n) in NP if ((i, m), (j, n)) in A_k[k]) == quicksum(x_kimjn[k, i, m, j, n] for (j, n) in NR if ((i, m), (j, n)) in A_k[k]) for k in D for (i, m) in NP)
+    model.addConstrs(xe_kjn[k, j, n] == quicksum(x_kimjn[k, i, m, j, n] for (i,m) in NR if ((i, m), (j, n)) in A_k[k]) for k in D for (j, n) in ND)
 
-    model.addConstrs(quicksum(xs_kim[k, i, m] for k in D) + quicksum(x_kimjn[k, j, n, i, m] for k in D for (j, n) in NR) - y_im[i, m] == 0 for (i, m) in NP)
-    model.addConstrs(quicksum(y_im[i, m] for m in M_i[i]) <= 1 for i in PP)
+    model.addConstrs(quicksum(xs_kim[k, i, m] for k in D) + quicksum(x_kimjn[k, i, m, j, n] for k in D for (j, n) in NR if ((i, m), (j, n)) in A_k[k]) - y_im[i, m] 
+                     == 0 for (i, m) in NP)
+    
+    model.addConstrs(quicksum(xe_kjn[k, j, n] for k in D) + quicksum(x_kimjn[k, j, n, i, m] for k in D for (i, m) in ND if ((j, n), (i, m)) in A_k[k]) - y_im[j, n] 
+                     == 0 for (j, n) in ND)
+    
 
-    model.addConstrs(quicksum(xs_kim[k, i, m] for m in MP_i[i]) + quicksum(x_kimjn[k, i, m, j, n] for m in MP_i[i] for (j, n) in NR) == z_ki[k, i] for k in D for i in PP)
+    model.addConstrs(quicksum(y_im[i, m] for o in PP for m in M_i[o] if (i, m) in NR) <= 1 for i in PP + PD)
 
-    model.addConstrs(xod_k[k] <= 1 - z_ki[k, i] for k in D for i in PP)
+    model.addConstrs(quicksum(xs_kim[k, i, m] for m in MP_i[i]) + quicksum(x_kimjn[k, j, n, i, m] for m in MP_i[i] for (j, n) in NP if ((i, m), (j, n)) in A_k[k]) 
+                     == z_ki[k, i] for k in D for i in PP)
+    
+   
+    #model.addConstrs(xod_k[k] <= 1 - z_ki[k, i] for k in D for i in PP)
 
     """Coupling and precedence constraints"""
-    model.addConstrs(quicksum(x_kimjn[k, i, m, j, n] for (j, n) in NR for m in MP_i[i]) - quicksum(x_kimjn[k, j, n, nr_passengers + i, m] for (j,n) in NR for m in [MD_i[i]]) == 0 for k in D for i in PP)
+    model.addConstrs(quicksum(x_kimjn[k, i, m, j, n] for (j, n) in NR for m in MP_i[i] if ((i, m), (j, n)) in A_k[k]) - quicksum(x_kimjn[k, j, n, nr_passengers + i, m] for (j,n) in NR for m in [MD_i[i]] if ((j, n), (nr_passengers + i, m)) in A_k[k]) == 0 for k in D for i in PP)
     model.addConstrs(t_kim[k, i, m] + T_imjn[(i, m), (nr_passengers + i, n)] - t_kim[k, nr_passengers + i, n] <= 0 for k in D for (i, m) in NP for o in PP for n in [MD_i[o]])
 
     """Time constraint"""
@@ -483,8 +489,6 @@ def add_constraints():
     disposable2 = model.addConstrs(t_kim[k, d_k[k][0], d_k[k][1]] - t_kim[k, o_k[k][0], o_k[k][1]] <= T_k[k] for k in D)
 
     model.addConstrs(t_kim[k, i, 0] <= t_kim[k, i, m] - (T_im[i, m] * y_im[i, m]) for k in D for i in PP for m in MP_i[i])
-
-  
     model.addConstrs(t_kim[k, nr_passengers + i, 0] >= t_kim[k, nr_passengers + i, m] + (T_im[nr_passengers + i, m] * y_im[nr_passengers + i, m]) for k in D for i in PP for m in [MD_i[i]])
 
     '''Capacity constraint'''
@@ -531,7 +535,7 @@ def debug():
 
     
 
-print(o_k)
+
 
 def visualize():
     arcs = {}
@@ -543,14 +547,11 @@ def visualize():
         from_delivery_to_destinations = [a for a in A_k[k] if (a[0]) in ND and (a[1]) == d_k[k] and xe_kjn[k, a[0][0], a[0][1]].x > 0.99]
         from_origin_to_destination = [a for a in A_k[k] if a[0][0] == k and a[1][0] == d_k[k][0] and xod_k[k].x > 0.99]
 
-        print(from_origins_arcs)
-        print(from_origin_to_destination)
-        print(between_ridesharing_arcs)
-        print(from_delivery_to_destinations)
+       
 
         arc_sum = 0
         
-
+        
         for arc in from_origins_arcs:
             arc_sum += T_imjn[(arc[0], arc[1])]
         for arc in from_origin_to_destination:
@@ -565,15 +566,117 @@ def visualize():
         arcsum[k] = arc_sum
    
 
+
+    for driver in arcs:
+        for arc in arcs[driver]:
+            """Between driver origin and and destination"""
+            if arc[0] == o_k[driver] and arc[1] == d_k[driver]:
+                stedsnavn1 = drivers_json["D" + str(arc[0][0])]["origin_location"]
+                stedsnavn2 = drivers_json["D" + str(arc[0][0])]["destination_location"]
+
+            """Between driver origin and all pick up candidate locations """
+            if arc[0] == o_k[driver] and arc[1][0] in PP:
+                """If pick up node is (j, x)"""
+                if arc[1][1]!=0:
+                    stedsnavn1 = drivers_json["D" + str(arc[0][0])]["origin_location"]
+                    stedsnavn2 = index_location[arc[1][1]]
+                else:   
+                    """If pick up node is (j, 0)""" 
+                    stedsnavn1 = drivers_json["D" + str(arc[0][0])]["origin_location"]
+                    stedsnavn2 = passengers_json["P" + str(arc[1][0])]["origin_location"]
+                    
+
+               
+            """Between all pick up nodes"""
+            if arc[0][0] in PP and arc[1][0] in PP:
+                """Between origins"""
+                if arc[0][1] == 0 and arc[1][1] == 0:      
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
+                    stedsnavn2 = passengers_json["P" + str(arc[1][0])]["origin_location"]
+                 
+                """From origin to candidate pick up """
+                if arc[0][1] == 0 and arc[1][1] != 0:
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
+                    stedsnavn2 = index_location[arc[1][1]]
+                   
+                """Between candidate pick ups"""
+                if arc[0][1] != 0 and arc[1][1] != 0:
+                    stedsnavn1 = index_location[arc[0][1]]
+                    stedsnavn2 = index_location[arc[1][1]]
+                    
+                """From candidate pick up to origin"""
+                if arc[0][1] != 0 and arc[1][1] == 0:
+                    stedsnavn1 = index_location[arc[0][1]]
+                    stedsnavn2 = passengers_json["P" + str(arc[1][0])]["origin_location"]
+                    
+            """Between pick up and delivery nodes"""
+            if arc[0][0] in PP and arc[1][0] in PD:
+                """Between origin and destination"""
+                if arc[0][1] == 0 and arc[1][1] == 0:      
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
+                    stedsnavn2 = passengers_json["P" + str(arc[1][0] - nr_passengers)]["destination_location"]
+     
+                    
+                """From origin to candidate delivery (Ingen candidate deliveries atm) """
+                if arc[0][1] == 0 and arc[1][1] != 0:
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
+                    stedsnavn2 = index_location[arc[1][1]]
+                  
+                """Between candidate pick up to candidate delivery"""
+                
+                if arc[0][1] != 0 and arc[1][1] != 0:
+         
+                    stedsnavn1 = index_location[arc[0][1]]
+                    stedsnavn2 = index_location[arc[1][1]]
+                  
+                """From candidate pick up to destination"""
+                if arc[0][1] != 0 and arc[1][1] == 0:
+                    stedsnavn1 = index_location[arc[0][1]]
+                    stedsnavn2 = passengers_json["P" + str(arc[1][0] - nr_passengers)]["destination_location"]
+                  
+
+            """Between all delivery nodes"""
+            if arc[0][0] in PD and arc[1][0] in PD:
+                """Between destinations"""
+                if arc[0][1] == 0 and arc[1][1] == 0:      
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0] - nr_passengers)]["destination_location"]
+                    stedsnavn2 = passengers_json["P" + str(arc[1][0] - nr_passengers)]["destination_location"]
+                    
+                """From destination to candidate delivery (Ingen candidate deliveries atm) """
+                if arc[0][1] == 0 and arc[1][1] != 0:
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0] - nr_passengers)]["destination_location"]
+                    stedsnavn2 = index_location[arc[1][1]]
+                    
+                """Between candidate pick up and candidate deliveries"""
+                if arc[0][1] != 0 and arc[1][1] != 0:
+                    stedsnavn1 = index_location[arc[0][1]]
+                    stedsnavn2 = index_location[arc[1][1]]
+                   
+                """From candidate delivery to destination"""
+                if arc[0][1] != 0 and arc[1][1] == 0:
+                    stedsnavn1 = index_location[arc[0][1]]
+                    stedsnavn2 = passengers_json["P" + str(arc[1][0] - nr_passengers)]["destination_location"]
+                   
+
+            """From candidate delivery to driver destination"""
+            if arc[0][0] in PD and arc[1] == d_k[driver]:
+                """Between passenger destinations and driver destination"""
+                if arc[0][1] == 0 and arc[1][1] == 0:      
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0] - nr_passengers)]["destination_location"]
+                    stedsnavn2 = drivers_json["D" + str(arc[1][0] - nr_drivers - 2*nr_passengers)]["destination_location"]
+                 
+                """From candidate delivery to driver destination"""
+                if arc[0][1] != 0 and arc[1][1] == 0:
+                    stedsnavn1 = index_location[arc[0][1]]
+                    stedsnavn2 = drivers_json["D" + str(arc[1][0] - nr_drivers - 2*nr_passengers)]["destination_location"]
+                   
+
     return arcs
 
 def run_only_once():
     optimize()
-    print("HIHIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
     print(model.objVal)
-    print(xod_k.select())
-    print("HIHIHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH")
-
+    #print(x_kimjn.select())
     arcs = visualize()
     
     return arcs
