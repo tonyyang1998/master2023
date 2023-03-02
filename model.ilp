@@ -1,0 +1,37 @@
+\ Model RRP_copy
+\ LP format - for model browsing. Use MPS format to capture full model detail.
+Maximize
+ 
+Subject To
+ R1: xe_kjn[0,3,0] + xe_kjn[0,4,0] + xod_k[0] = 1
+ R10: - x_kimjn[0,1,0,3,0] - x_kimjn[0,2,2,3,0] - x_kimjn[0,2,9,3,0]
+   - x_kimjn[0,2,12,3,0] - x_kimjn[0,2,22,3,0] - x_kimjn[0,2,6,3,0]
+   - x_kimjn[0,2,7,3,0] - x_kimjn[0,2,0,3,0] + x_kimjn[0,3,0,4,0]
+   - x_kimjn[0,4,0,3,0] + xe_kjn[0,3,0] = 0
+ R11: - x_kimjn[0,1,0,4,0] - x_kimjn[0,2,2,4,0] - x_kimjn[0,2,9,4,0]
+   - x_kimjn[0,2,12,4,0] - x_kimjn[0,2,22,4,0] - x_kimjn[0,2,6,4,0]
+   - x_kimjn[0,2,7,4,0] - x_kimjn[0,2,0,4,0] - x_kimjn[0,3,0,4,0]
+   + x_kimjn[0,4,0,3,0] + xe_kjn[0,4,0] = 0
+ R28: xod_k[0] = 0
+ R29: x_kimjn[0,1,0,3,0] + x_kimjn[0,2,2,3,0] + x_kimjn[0,2,9,3,0]
+   + x_kimjn[0,2,12,3,0] + x_kimjn[0,2,22,3,0] + x_kimjn[0,2,6,3,0]
+   + x_kimjn[0,2,7,3,0] + x_kimjn[0,2,0,3,0] + x_kimjn[0,4,0,3,0] = 0
+ R30: x_kimjn[0,1,0,4,0] + x_kimjn[0,2,2,1,0] + x_kimjn[0,2,2,3,0]
+   + 2 x_kimjn[0,2,2,4,0] + x_kimjn[0,2,9,1,0] + x_kimjn[0,2,9,3,0]
+   + 2 x_kimjn[0,2,9,4,0] + x_kimjn[0,2,12,1,0] + x_kimjn[0,2,12,3,0]
+   + 2 x_kimjn[0,2,12,4,0] + x_kimjn[0,2,22,1,0] + x_kimjn[0,2,22,3,0]
+   + 2 x_kimjn[0,2,22,4,0] + x_kimjn[0,2,6,1,0] + x_kimjn[0,2,6,3,0]
+   + 2 x_kimjn[0,2,6,4,0] + x_kimjn[0,2,7,1,0] + x_kimjn[0,2,7,3,0]
+   + 2 x_kimjn[0,2,7,4,0] + x_kimjn[0,2,0,4,0] + x_kimjn[0,3,0,4,0] = 0
+Bounds
+Binaries
+ x_kimjn[0,1,0,3,0] x_kimjn[0,1,0,4,0] x_kimjn[0,2,2,1,0]
+ x_kimjn[0,2,2,3,0] x_kimjn[0,2,2,4,0] x_kimjn[0,2,9,1,0]
+ x_kimjn[0,2,9,3,0] x_kimjn[0,2,9,4,0] x_kimjn[0,2,12,1,0]
+ x_kimjn[0,2,12,3,0] x_kimjn[0,2,12,4,0] x_kimjn[0,2,22,1,0]
+ x_kimjn[0,2,22,3,0] x_kimjn[0,2,22,4,0] x_kimjn[0,2,6,1,0]
+ x_kimjn[0,2,6,3,0] x_kimjn[0,2,6,4,0] x_kimjn[0,2,7,1,0]
+ x_kimjn[0,2,7,3,0] x_kimjn[0,2,7,4,0] x_kimjn[0,2,0,3,0]
+ x_kimjn[0,2,0,4,0] x_kimjn[0,3,0,4,0] x_kimjn[0,4,0,3,0] xe_kjn[0,3,0]
+ xe_kjn[0,4,0] xod_k[0]
+End
