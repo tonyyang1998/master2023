@@ -479,8 +479,8 @@ def add_constraints():
     model.addConstrs(
         t_kim[k, i, m] + T_imjn[(i, m), (d_k[k][0], d_k[k][1])] - t_kim[k, d_k[k][0], d_k[k][1]] + M[k] *(1 - xe_kjn[k, i, m]) >= 0 for k in D for (i, m) in ND)
 
-    model.addConstrs(A_i1[i] <= t_kim[k, nr_passengers + i, n] + T_im[nr_passengers, n] for k in D for i in PP for n in [MD_i[i]])
-    model.addConstrs(t_kim[k, nr_passengers + i, n] + T_im[nr_passengers, n] <= A_i2[nr_passengers] for k in D for i in PP for n in [MD_i[i]])
+    model.addConstrs(A_i1[i] <= t_kim[k, nr_passengers + i, 0] + T_im[nr_passengers + i, 0] for k in D for i in PP)
+    model.addConstrs(t_kim[k, nr_passengers + i, 0] + T_im[nr_passengers + i, 0] <= A_i2[nr_passengers] for k in D for i in PP)
     
     model.addConstrs(A_i1[k] <= t_kim[k, d_k[k][0], d_k[k][1]] for k in D)
     model.addConstrs(t_kim[k, d_k[k][0], d_k[k][1]] <= A_i2[k] for k in D)
