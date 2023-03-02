@@ -528,11 +528,7 @@ def my_callback(model, where):
             result_bound.append(current_bound)
             result_time.append(runtime)
 
-def debug():
-    model.computeIIS()
-    model.write('model.MPS')
-    model.write('model.lp')
-    model.write('model.ilp')
+
 
 def sort_segments(segments):
     # Create a dictionary to hold the endpoints of each segment
@@ -716,6 +712,12 @@ def visualize():
     
 
     return arcs, paths
+
+def debug():
+    model.computeIIS()
+    model.write('model.MPS')
+    model.write('model.lp')
+    model.write('model.ilp')
 
 def run_only_once():
     optimize()

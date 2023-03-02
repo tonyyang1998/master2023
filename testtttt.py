@@ -3,7 +3,7 @@ import gurobipy as gp
 
 model = Model('RRP')
 
-x = model.addVar(1, 10)
+"""x = model.addVar(1, 10)
 y = model.addVar(1, 10)
 z = model.addVar(1, 10)
 
@@ -23,4 +23,32 @@ model.optimize()
 if model.SolCount > 0:
   print(x.X)
   print(y.X)
-  print(z.X)
+  print(z.X)"""
+
+
+x = model.addVar(1, 10)
+y = model.addVar(1, 10)
+
+
+model.update()
+model.ModelSense = GRB.MINIMIZE
+
+# Primary objective: x + 2 y
+ob1 = model.setObjective(x + y)
+
+model.addConstr(x >= 6.0)
+model.addConstr(y >= 6.0)
+model.addConstr(x + y <= 11.0)
+
+model.optimize()
+
+def debug():
+    model.computeIIS()
+    model.write('model.MPS')
+    model.write('model.lp')
+    model.write('model.ilp')
+
+debug()
+if model.SolCount > 0:
+  print(x.X)
+  print(y.X)
