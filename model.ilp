@@ -3,19 +3,11 @@
 Maximize
  
 Subject To
- R0: xs_kim[0,1,0] + xs_kim[0,2,0] + xod_k[0] = 1
- R2: - x_kimjn[0,1,0,2,0] - x_kimjn[0,1,0,3,0] - x_kimjn[0,1,0,4,0]
-   + x_kimjn[0,2,0,1,0] + xs_kim[0,1,0] = 0
- R3: x_kimjn[0,1,0,2,0] - x_kimjn[0,2,0,1,0] - x_kimjn[0,2,0,3,0]
-   - x_kimjn[0,2,0,4,0] + xs_kim[0,2,0] = 0
- R16: xod_k[0] = 0
- R17: x_kimjn[0,1,0,2,0] + 2 x_kimjn[0,1,0,3,0] + x_kimjn[0,1,0,4,0]
-   + x_kimjn[0,2,0,3,0] + x_kimjn[0,4,0,3,0] = 0
- R18: x_kimjn[0,1,0,4,0] + x_kimjn[0,2,0,1,0] + x_kimjn[0,2,0,3,0]
-   + 2 x_kimjn[0,2,0,4,0] + x_kimjn[0,3,0,4,0] = 0
+ R0: xs_kim[0,1,0] + xod_k[0] = 1
+ (4.5)[0,1,0]: - x_kimjn[0,1,0,2,0] + xs_kim[0,1,0] = 0
+ R9: xod_k[0] = 0
+ R10: 2 x_kimjn[0,1,0,2,0] = 0
 Bounds
 Binaries
- x_kimjn[0,1,0,2,0] x_kimjn[0,1,0,3,0] x_kimjn[0,1,0,4,0]
- x_kimjn[0,2,0,1,0] x_kimjn[0,2,0,3,0] x_kimjn[0,2,0,4,0]
- x_kimjn[0,3,0,4,0] x_kimjn[0,4,0,3,0] xs_kim[0,1,0] xs_kim[0,2,0] xod_k[0]
+ x_kimjn[0,1,0,2,0] xs_kim[0,1,0] xod_k[0]
 End

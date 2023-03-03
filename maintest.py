@@ -413,15 +413,17 @@ def set_variables():
     model.update()
     xod_k = model.addVars([k for k in D], vtype=GRB.BINARY, name='xod_k')
     model.update()
-    y_kim = model.addVars([(k, i, m) for (i, m) in NR for k in D], vtype=GRB.BINARY, name='y_kim')
+    yp_kim = model.addVars([(k, i, m) for (i, m) in NP for k in D], vtype=GRB.BINARY, name='yp_kim')
+    model.update()
+    yd_kim = model.addVars([(k, i, m) for (i, m) in ND for k in D], vtype=GRB.BINARY, name='yd_kim')
     model.update()
     z_ki = model.addVars([(k, i) for k in D for i in PP], vtype=GRB.BINARY, name='z_ki')
     model.update()
     t_kim = model.addVars([(k, i, m) for k in D for (i, m) in N], vtype=GRB.CONTINUOUS, name='t_ki')
     model.update()
-    return x_kimjn, xs_kim, xe_kjn, xod_k, y_kim, z_ki, t_kim
+    return x_kimjn, xs_kim, xe_kjn, xod_k, yp_kim, yd_kim, z_ki, t_kim
 
-x_kimjn, xs_kim, xe_kjn, xod_k, y_kim, z_ki, t_kim = set_variables()
+x_kimjn, xs_kim, xe_kjn, xod_k, yp_kim, yd_kim, z_ki, t_kim = set_variables()
 
 """Objective"""
 def set_objective():
@@ -442,16 +444,16 @@ def add_constraints():
     model.addConstrs(quicksum(xs_kim[k, i, m] for (i, m) in NP) + xod_k[k] == 1 for k in D)
     model.addConstrs(quicksum(xe_kjn[k, j, n] for (j, n) in ND) + xod_k[k] == 1 for k in D)
 
-    model.addConstrs(xs_kim[k, i, m] + quicksum(x_kimjn[k, j, n, i, m] for (j, n) in NP if ((j, n), (i, m)) in A_k[k]) == quicksum(x_kimjn[k, i, m, j, n] for (j, n) in NR if ((i, m), (j, n)) in A_k[k]) for k in D for (i, m) in NP)
-    model.addConstrs(xe_kjn[k, j, n] + quicksum(x_kimjn[k, j, n, i, m] for (i, m) in ND if ((j, n), (i, m)) in A_k[k]) == quicksum(x_kimjn[k, i, m, j, n] for (i,m) in NR if ((i, m), (j, n)) in A_k[k]) for k in D for (j, n) in ND)
+    model.addConstrs((xs_kim[k, i, m] + quicksum(x_kimjn[k, j, n, i, m] for (j, n) in NP if ((j, n), (i, m)) in A_k[k]) == quicksum(x_kimjn[k, i, m, j, n] for (j, n) in NR if ((i, m), (j, n)) in A_k[k]) for k in D for (i, m) in NP), name = "(4.5)")
+    model.addConstrs((xe_kjn[k, j, n] + quicksum(x_kimjn[k, j, n, i, m] for (i, m) in ND if ((j, n), (i, m)) in A_k[k]) == quicksum(x_kimjn[k, i, m, j, n] for (i,m) in NR if ((i, m), (j, n)) in A_k[k]) for k in D for (j, n) in ND), name = "(4.6)")
 
-    model.addConstrs(xs_kim[k, i, m] + quicksum(x_kimjn[k, j, n, i, m] for (j, n) in NP if ((j, n), (i, m)) in A_k[k]) - y_kim[k, i, m] == 0 for (i, m) in NP for k in D)
-    model.addConstrs(xe_kjn[k, j, n] + quicksum(x_kimjn[k, j, n, i, m] for (i, m) in ND if ((j, n), (i, m)) in A_k[k]) - y_kim[k, j, n] 
-                     == 0 for (j, n) in ND for k in D)
+    model.addConstrs((xs_kim[k, i, m] + quicksum(x_kimjn[k, j, n, i, m] for (j, n) in NP if ((j, n), (i, m)) in A_k[k]) - yp_kim[k, i, m] == 0 for k in D for (i, m) in NP),  name = "(4.7)")
+    model.addConstrs((xe_kjn[k, j, n] + quicksum(x_kimjn[k, j, n, i, m] for (i, m) in ND if ((j, n), (i, m)) in A_k[k]) - yd_kim[k, j, n] 
+                     == 0 for (j, n) in ND for k in D), name = "(4.8)")
     
 
-    model.addConstrs(quicksum(y_kim[k, i, m] for m in MP_i[i] if (i, m) in NP) <= 1 for k in D for i in PP)
-    model.addConstrs(quicksum(y_kim[k, i, m] for m in [MD_i[i-nr_passengers]] if (i, m) in ND) <= 1 for k in D for i in PD)
+    model.addConstrs(quicksum(yp_kim[k, i, m] for m in MP_i[i] if (i, m) in NP) <= 1 for k in D for i in PP)
+    model.addConstrs(quicksum(yd_kim[k, i, m] for m in [MD_i[i-nr_passengers]] if (i, m) in ND) <= 1 for k in D for i in PD)
 
     model.addConstrs(quicksum(xs_kim[k, i, m] for m in MP_i[i] if (i, m) in NP) + quicksum(x_kimjn[k, j, n, i, m] for (j, n) in NP for m in MP_i[i] if ((j, n), (i, m)) in A_k[k]) 
                      == z_ki[k, i] for k in D for i in PP)
@@ -459,6 +461,8 @@ def add_constraints():
    
     #model.addConstrs(xod_k[k] <= 1 - z_ki[k, i] for k in D for i in PP)
     model.addConstrs(xod_k[k] == 0 for k in D)
+
+
 
     """Coupling and precedence constraints"""
     model.addConstrs(quicksum(x_kimjn[k, i, m, j, n] for (j, n) in NR for m in MP_i[i] if ((i, m), (j, n)) in A_k[k]) + quicksum(x_kimjn[k, j, n, nr_passengers + i, m] for (j,n) in NR for m in [MD_i[i]] if ((j, n), (nr_passengers + i, m)) in A_k[k]) == 0 for k in D for i in PP)
@@ -489,8 +493,8 @@ def add_constraints():
     disposable1 = model.addConstrs(t_kim[k, nr_passengers + i, 0] - t_kim[k, i, 0] <= T_k[i] for k in D for i in PP)
     disposable2 = model.addConstrs(t_kim[k, d_k[k][0], d_k[k][1]] - t_kim[k, o_k[k][0], o_k[k][1]] <= T_k[k] for k in D)
 
-    model.addConstrs(t_kim[k, i, 0] <= t_kim[k, i, m] - (T_im[i, m] * y_kim[k, i, m]) for k in D for i in PP for m in MP_i[i])
-    model.addConstrs(t_kim[k, nr_passengers + i, 0] >= t_kim[k, nr_passengers + i, m] + (T_im[nr_passengers + i, m] * y_kim[k, nr_passengers + i, m]) for k in D for i in PP for m in [MD_i[i]])
+    model.addConstrs(t_kim[k, i, 0] <= t_kim[k, i, m] - (T_im[i, m] * yp_kim[k, i, m]) for k in D for i in PP for m in MP_i[i])
+    model.addConstrs(t_kim[k, nr_passengers + i, 0] >= t_kim[k, nr_passengers + i, m] + (T_im[nr_passengers + i, m] * yd_kim[k, nr_passengers + i, m]) for k in D for i in PP for m in [MD_i[i]])
 
     '''Capacity constraint'''
     model.addConstrs(quicksum(z_ki[k, i] for i in PP) <= Q_k[k] for k in D)
@@ -591,8 +595,8 @@ def visualize():
             arc_sum += T_imjn[(arc[0], arc[1])]
        
         unsorted_path =  from_origin_to_destination + from_origins_arcs + between_ridesharing_arcs + from_delivery_to_destinations
-        sorted_segments = sort_segments(unsorted_path)
-        arcs[k] = sorted_segments
+        #sorted_segments = sort_segments(unsorted_path)
+        arcs[k] = unsorted_path
         arcsum[k] = arc_sum
     
 
@@ -721,7 +725,7 @@ def debug():
 
 def run_only_once():
     optimize()
-    debug()
+    #debug()
     #print(model.objVal)
     #print(x_kimjn.select())
     arcs, paths = visualize()

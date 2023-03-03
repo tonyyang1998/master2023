@@ -36,7 +36,7 @@ model.ModelSense = GRB.MINIMIZE
 # Primary objective: x + 2 y
 ob1 = model.setObjective(x + y)
 
-model.addConstr(x >= 6.0)
+model.addConstr(x >= 6.0, "saus")
 model.addConstr(y >= 6.0)
 model.addConstr(x + y <= 11.0)
 
