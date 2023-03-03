@@ -535,9 +535,6 @@ def visualize():
 
     return arcs, path, picked_up
 
-def get_feasible_variables():
-    for i in model.getVars():
-       
 
 
 def create_pareto_front():

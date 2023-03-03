@@ -694,10 +694,6 @@ def get_result():
     return arcs, paths
 
 
-def visualize(path):
-
-    
-
 
 def debug():
     model.computeIIS()
