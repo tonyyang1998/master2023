@@ -85,6 +85,8 @@ def initialize_MPi():
         result = []
         for location_pair in locations[passenger]:
             result.append(location_index[location_pair[1]])
+        if 0 not in result:
+            result.append(0)
         MP_i[passenger] = result
     return MP_i
 
@@ -421,8 +423,6 @@ def set_variables():
 
 x_kimjn, xs_kim, xe_kjn, xod_k, y_kim, z_ki, t_kim = set_variables()
 
-print(xs_kim)
-
 """Objective"""
 def set_objective():
     model.ModelSense = GRB.MAXIMIZE
@@ -433,10 +433,9 @@ def set_objective():
 
 set_objective()
 
-
 """Constraints"""
 
-print(MP_i)
+
 
 def add_constraints():
     '''Routing constraits'''
@@ -450,13 +449,15 @@ def add_constraints():
     model.addConstrs(xe_kjn[k, j, n] + quicksum(x_kimjn[k, j, n, i, m] for (i, m) in ND if ((j, n), (i, m)) in A_k[k]) - y_kim[k, j, n] 
                      == 0 for (j, n) in ND for k in D)
     
-    model.addConstrs(quicksum(y_kim[k, i, m] for o in PP for m in M_i[o] if (i, m) in NR) <= 1 for i in PP + PD for k in D)
+
+    model.addConstrs(quicksum(y_kim[k, i, m] for m in MP_i[i] if (i, m) in NP) <= 1 for k in D for i in PP)
+    model.addConstrs(quicksum(y_kim[k, i, m] for m in [MD_i[i-nr_passengers]] if (i, m) in ND) <= 1 for k in D for i in PD)
 
     model.addConstrs(quicksum(xs_kim[k, i, m] for m in MP_i[i] if (i, m) in NP) + quicksum(x_kimjn[k, j, n, i, m] for (j, n) in NP for m in MP_i[i] if ((j, n), (i, m)) in A_k[k]) 
                      == z_ki[k, i] for k in D for i in PP)
     
    
-    #model.addConstrs(xod_k[k] <= 1 - z_ki[k, i] for k in D for i in PP)
+    model.addConstrs(xod_k[k] <= 1 - z_ki[k, i] for k in D for i in PP)
     model.addConstrs(xod_k[k] == 0 for k in D)
 
     """Coupling and precedence constraints"""
@@ -727,6 +728,23 @@ def run_only_once():
     #plt.show()    
     return arcs
     
+print("SETS")
+print("D:", D)
+print("PP:", PP)
+print("PD:", PD)
+print("P:", P)
+print("MP_i:", MP_i)
+print("MD_i:", MD_i)
+print("M_i:", M_i)
+print("N:", N)
+print("A_K", A_k)
+
+print("PARAMETERS")
+print("o_k:", o_k)
+print("d_k:", d_k)
+print("T_k:", T_k)
+print("T_imjn:", T_imjn)
+print("T_im:", T_im)
 
 print(run_only_once())
 
