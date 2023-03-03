@@ -378,8 +378,6 @@ def add_parameters():
 
 add_parameters()
 
-
-
 """Helper functions"""
 
 delivery_and_pickup_node_pairs = {PD[i]: PP[i] for i in range(len(PD))}
@@ -395,6 +393,8 @@ def initialize_big_M():
 
 M = initialize_big_M()
 
+
+print(T_imjn)
 
 
 """Variables"""
@@ -421,6 +421,7 @@ def set_variables():
 
 x_kimjn, xs_kim, xe_kjn, xod_k, y_kim, z_ki, t_kim = set_variables()
 
+print(xs_kim)
 
 """Objective"""
 def set_objective():
@@ -445,12 +446,10 @@ def add_constraints():
     model.addConstrs(xs_kim[k, i, m] + quicksum(x_kimjn[k, j, n, i, m] for (j, n) in NP if ((j, n), (i, m)) in A_k[k]) == quicksum(x_kimjn[k, i, m, j, n] for (j, n) in NR if ((i, m), (j, n)) in A_k[k]) for k in D for (i, m) in NP)
     model.addConstrs(xe_kjn[k, j, n] + quicksum(x_kimjn[k, j, n, i, m] for (i, m) in ND if ((j, n), (i, m)) in A_k[k]) == quicksum(x_kimjn[k, i, m, j, n] for (i,m) in NR if ((i, m), (j, n)) in A_k[k]) for k in D for (j, n) in ND)
 
-    model.addConstrs(xs_kim[k, i, m] + quicksum(x_kimjn[k, i, m, j, n] for (j, n) in NR if ((i, m), (j, n)) in A_k[k]) - y_kim[k, i, m] == 0 for (i, m) in NP for k in D)
-    
+    model.addConstrs(xs_kim[k, i, m] + quicksum(x_kimjn[k, j, n, i, m] for (j, n) in NP if ((j, n), (i, m)) in A_k[k]) - y_kim[k, i, m] == 0 for (i, m) in NP for k in D)
     model.addConstrs(xe_kjn[k, j, n] + quicksum(x_kimjn[k, j, n, i, m] for (i, m) in ND if ((j, n), (i, m)) in A_k[k]) - y_kim[k, j, n] 
                      == 0 for (j, n) in ND for k in D)
     
-
     model.addConstrs(quicksum(y_kim[k, i, m] for o in PP for m in M_i[o] if (i, m) in NR) <= 1 for i in PP + PD for k in D)
 
     model.addConstrs(quicksum(xs_kim[k, i, m] for m in MP_i[i] if (i, m) in NP) + quicksum(x_kimjn[k, j, n, i, m] for (j, n) in NP for m in MP_i[i] if ((j, n), (i, m)) in A_k[k]) 

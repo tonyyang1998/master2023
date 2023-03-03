@@ -3,35 +3,113 @@
 Maximize
  
 Subject To
- R1: xe_kjn[0,3,0] + xe_kjn[0,4,0] + xod_k[0] = 1
- R10: - x_kimjn[0,1,0,3,0] - x_kimjn[0,2,2,3,0] - x_kimjn[0,2,9,3,0]
-   - x_kimjn[0,2,12,3,0] - x_kimjn[0,2,22,3,0] - x_kimjn[0,2,6,3,0]
-   - x_kimjn[0,2,7,3,0] - x_kimjn[0,2,0,3,0] + x_kimjn[0,3,0,4,0]
-   - x_kimjn[0,4,0,3,0] + xe_kjn[0,3,0] = 0
- R11: - x_kimjn[0,1,0,4,0] - x_kimjn[0,2,2,4,0] - x_kimjn[0,2,9,4,0]
-   - x_kimjn[0,2,12,4,0] - x_kimjn[0,2,22,4,0] - x_kimjn[0,2,6,4,0]
-   - x_kimjn[0,2,7,4,0] - x_kimjn[0,2,0,4,0] - x_kimjn[0,3,0,4,0]
-   + x_kimjn[0,4,0,3,0] + xe_kjn[0,4,0] = 0
- R28: xod_k[0] = 0
- R29: x_kimjn[0,1,0,3,0] + x_kimjn[0,2,2,3,0] + x_kimjn[0,2,9,3,0]
-   + x_kimjn[0,2,12,3,0] + x_kimjn[0,2,22,3,0] + x_kimjn[0,2,6,3,0]
-   + x_kimjn[0,2,7,3,0] + x_kimjn[0,2,0,3,0] + x_kimjn[0,4,0,3,0] = 0
- R30: x_kimjn[0,1,0,4,0] + x_kimjn[0,2,2,1,0] + x_kimjn[0,2,2,3,0]
-   + 2 x_kimjn[0,2,2,4,0] + x_kimjn[0,2,9,1,0] + x_kimjn[0,2,9,3,0]
-   + 2 x_kimjn[0,2,9,4,0] + x_kimjn[0,2,12,1,0] + x_kimjn[0,2,12,3,0]
-   + 2 x_kimjn[0,2,12,4,0] + x_kimjn[0,2,22,1,0] + x_kimjn[0,2,22,3,0]
-   + 2 x_kimjn[0,2,22,4,0] + x_kimjn[0,2,6,1,0] + x_kimjn[0,2,6,3,0]
-   + 2 x_kimjn[0,2,6,4,0] + x_kimjn[0,2,7,1,0] + x_kimjn[0,2,7,3,0]
-   + 2 x_kimjn[0,2,7,4,0] + x_kimjn[0,2,0,4,0] + x_kimjn[0,3,0,4,0] = 0
+ R0: xs_kim[0,1,17] + xs_kim[0,1,0] + xs_kim[0,2,1] + xs_kim[0,2,2]
+   + xs_kim[0,2,9] + xs_kim[0,2,12] + xs_kim[0,2,10] + xs_kim[0,2,5]
+   + xs_kim[0,2,6] + xs_kim[0,2,7] + xs_kim[0,2,8] + xs_kim[0,2,13]
+   + xs_kim[0,2,0] + xod_k[0] = 1
+ R2: - x_kimjn[0,1,17,2,1] - x_kimjn[0,1,17,2,2] - x_kimjn[0,1,17,2,9]
+   - x_kimjn[0,1,17,2,12] - x_kimjn[0,1,17,2,10] - x_kimjn[0,1,17,2,5]
+   - x_kimjn[0,1,17,2,6] - x_kimjn[0,1,17,2,7] - x_kimjn[0,1,17,2,8]
+   - x_kimjn[0,1,17,2,13] - x_kimjn[0,1,17,2,0] - x_kimjn[0,1,17,3,0]
+   - x_kimjn[0,1,17,4,0] + x_kimjn[0,2,1,1,17] + x_kimjn[0,2,2,1,17]
+   + x_kimjn[0,2,9,1,17] + x_kimjn[0,2,12,1,17] + x_kimjn[0,2,10,1,17]
+   + x_kimjn[0,2,5,1,17] + x_kimjn[0,2,6,1,17] + x_kimjn[0,2,7,1,17]
+   + x_kimjn[0,2,8,1,17] + x_kimjn[0,2,13,1,17] + x_kimjn[0,2,0,1,17]
+   + xs_kim[0,1,17] = 0
+ R3: - x_kimjn[0,1,0,2,1] - x_kimjn[0,1,0,2,2] - x_kimjn[0,1,0,2,9]
+   - x_kimjn[0,1,0,2,12] - x_kimjn[0,1,0,2,10] - x_kimjn[0,1,0,2,5]
+   - x_kimjn[0,1,0,2,6] - x_kimjn[0,1,0,2,7] - x_kimjn[0,1,0,2,8]
+   - x_kimjn[0,1,0,2,13] - x_kimjn[0,1,0,2,0] - x_kimjn[0,1,0,3,0]
+   - x_kimjn[0,1,0,4,0] + x_kimjn[0,2,1,1,0] + x_kimjn[0,2,2,1,0]
+   + x_kimjn[0,2,9,1,0] + x_kimjn[0,2,12,1,0] + x_kimjn[0,2,10,1,0]
+   + x_kimjn[0,2,5,1,0] + x_kimjn[0,2,6,1,0] + x_kimjn[0,2,7,1,0]
+   + x_kimjn[0,2,8,1,0] + x_kimjn[0,2,13,1,0] + x_kimjn[0,2,0,1,0]
+   + xs_kim[0,1,0] = 0
+ R4: x_kimjn[0,1,17,2,1] + x_kimjn[0,1,0,2,1] - x_kimjn[0,2,1,1,17]
+   - x_kimjn[0,2,1,1,0] - x_kimjn[0,2,1,3,0] - x_kimjn[0,2,1,4,0]
+   + xs_kim[0,2,1] = 0
+ R5: x_kimjn[0,1,17,2,2] + x_kimjn[0,1,0,2,2] - x_kimjn[0,2,2,1,17]
+   - x_kimjn[0,2,2,1,0] - x_kimjn[0,2,2,3,0] - x_kimjn[0,2,2,4,0]
+   + xs_kim[0,2,2] = 0
+ R6: x_kimjn[0,1,17,2,9] + x_kimjn[0,1,0,2,9] - x_kimjn[0,2,9,1,17]
+   - x_kimjn[0,2,9,1,0] - x_kimjn[0,2,9,3,0] - x_kimjn[0,2,9,4,0]
+   + xs_kim[0,2,9] = 0
+ R7: x_kimjn[0,1,17,2,12] + x_kimjn[0,1,0,2,12] - x_kimjn[0,2,12,1,17]
+   - x_kimjn[0,2,12,1,0] - x_kimjn[0,2,12,3,0] - x_kimjn[0,2,12,4,0]
+   + xs_kim[0,2,12] = 0
+ R8: x_kimjn[0,1,17,2,10] + x_kimjn[0,1,0,2,10] - x_kimjn[0,2,10,1,17]
+   - x_kimjn[0,2,10,1,0] - x_kimjn[0,2,10,3,0] - x_kimjn[0,2,10,4,0]
+   + xs_kim[0,2,10] = 0
+ R9: x_kimjn[0,1,17,2,5] + x_kimjn[0,1,0,2,5] - x_kimjn[0,2,5,1,17]
+   - x_kimjn[0,2,5,1,0] - x_kimjn[0,2,5,3,0] - x_kimjn[0,2,5,4,0]
+   + xs_kim[0,2,5] = 0
+ R10: x_kimjn[0,1,17,2,6] + x_kimjn[0,1,0,2,6] - x_kimjn[0,2,6,1,17]
+   - x_kimjn[0,2,6,1,0] - x_kimjn[0,2,6,3,0] - x_kimjn[0,2,6,4,0]
+   + xs_kim[0,2,6] = 0
+ R11: x_kimjn[0,1,17,2,7] + x_kimjn[0,1,0,2,7] - x_kimjn[0,2,7,1,17]
+   - x_kimjn[0,2,7,1,0] - x_kimjn[0,2,7,3,0] - x_kimjn[0,2,7,4,0]
+   + xs_kim[0,2,7] = 0
+ R12: x_kimjn[0,1,17,2,8] + x_kimjn[0,1,0,2,8] - x_kimjn[0,2,8,1,17]
+   - x_kimjn[0,2,8,1,0] - x_kimjn[0,2,8,3,0] - x_kimjn[0,2,8,4,0]
+   + xs_kim[0,2,8] = 0
+ R13: x_kimjn[0,1,17,2,13] + x_kimjn[0,1,0,2,13] - x_kimjn[0,2,13,1,17]
+   - x_kimjn[0,2,13,1,0] - x_kimjn[0,2,13,3,0] - x_kimjn[0,2,13,4,0]
+   + xs_kim[0,2,13] = 0
+ R14: x_kimjn[0,1,17,2,0] + x_kimjn[0,1,0,2,0] - x_kimjn[0,2,0,1,17]
+   - x_kimjn[0,2,0,1,0] - x_kimjn[0,2,0,3,0] - x_kimjn[0,2,0,4,0]
+   + xs_kim[0,2,0] = 0
+ R38: xod_k[0] = 0
+ R39: x_kimjn[0,1,17,2,1] + x_kimjn[0,1,17,2,2] + x_kimjn[0,1,17,2,9]
+   + x_kimjn[0,1,17,2,12] + x_kimjn[0,1,17,2,10] + x_kimjn[0,1,17,2,5]
+   + x_kimjn[0,1,17,2,6] + x_kimjn[0,1,17,2,7] + x_kimjn[0,1,17,2,8]
+   + x_kimjn[0,1,17,2,13] + x_kimjn[0,1,17,2,0] + 2 x_kimjn[0,1,17,3,0]
+   + x_kimjn[0,1,17,4,0] + x_kimjn[0,1,0,3,0] + x_kimjn[0,2,1,3,0]
+   + x_kimjn[0,2,2,3,0] + x_kimjn[0,2,9,3,0] + x_kimjn[0,2,12,3,0]
+   + x_kimjn[0,2,10,3,0] + x_kimjn[0,2,5,3,0] + x_kimjn[0,2,6,3,0]
+   + x_kimjn[0,2,7,3,0] + x_kimjn[0,2,8,3,0] + x_kimjn[0,2,13,3,0]
+   + x_kimjn[0,2,0,3,0] + x_kimjn[0,4,0,3,0] = 0
+ R40: x_kimjn[0,1,17,4,0] + x_kimjn[0,1,0,4,0] + x_kimjn[0,2,1,1,17]
+   + x_kimjn[0,2,1,1,0] + x_kimjn[0,2,1,3,0] + 2 x_kimjn[0,2,1,4,0]
+   + x_kimjn[0,2,2,1,17] + x_kimjn[0,2,2,1,0] + x_kimjn[0,2,2,3,0]
+   + 2 x_kimjn[0,2,2,4,0] + x_kimjn[0,2,9,1,17] + x_kimjn[0,2,9,1,0]
+   + x_kimjn[0,2,9,3,0] + 2 x_kimjn[0,2,9,4,0] + x_kimjn[0,2,12,1,17]
+   + x_kimjn[0,2,12,1,0] + x_kimjn[0,2,12,3,0] + 2 x_kimjn[0,2,12,4,0]
+   + x_kimjn[0,2,10,1,17] + x_kimjn[0,2,10,1,0] + x_kimjn[0,2,10,3,0]
+   + 2 x_kimjn[0,2,10,4,0] + x_kimjn[0,2,5,1,17] + x_kimjn[0,2,5,1,0]
+   + x_kimjn[0,2,5,3,0] + 2 x_kimjn[0,2,5,4,0] + x_kimjn[0,2,6,1,17]
+   + x_kimjn[0,2,6,1,0] + x_kimjn[0,2,6,3,0] + 2 x_kimjn[0,2,6,4,0]
+   + x_kimjn[0,2,7,1,17] + x_kimjn[0,2,7,1,0] + x_kimjn[0,2,7,3,0]
+   + 2 x_kimjn[0,2,7,4,0] + x_kimjn[0,2,8,1,17] + x_kimjn[0,2,8,1,0]
+   + x_kimjn[0,2,8,3,0] + 2 x_kimjn[0,2,8,4,0] + x_kimjn[0,2,13,1,17]
+   + x_kimjn[0,2,13,1,0] + x_kimjn[0,2,13,3,0] + 2 x_kimjn[0,2,13,4,0]
+   + x_kimjn[0,2,0,4,0] + x_kimjn[0,3,0,4,0] = 0
 Bounds
 Binaries
- x_kimjn[0,1,0,3,0] x_kimjn[0,1,0,4,0] x_kimjn[0,2,2,1,0]
- x_kimjn[0,2,2,3,0] x_kimjn[0,2,2,4,0] x_kimjn[0,2,9,1,0]
- x_kimjn[0,2,9,3,0] x_kimjn[0,2,9,4,0] x_kimjn[0,2,12,1,0]
- x_kimjn[0,2,12,3,0] x_kimjn[0,2,12,4,0] x_kimjn[0,2,22,1,0]
- x_kimjn[0,2,22,3,0] x_kimjn[0,2,22,4,0] x_kimjn[0,2,6,1,0]
- x_kimjn[0,2,6,3,0] x_kimjn[0,2,6,4,0] x_kimjn[0,2,7,1,0]
- x_kimjn[0,2,7,3,0] x_kimjn[0,2,7,4,0] x_kimjn[0,2,0,3,0]
- x_kimjn[0,2,0,4,0] x_kimjn[0,3,0,4,0] x_kimjn[0,4,0,3,0] xe_kjn[0,3,0]
- xe_kjn[0,4,0] xod_k[0]
+ x_kimjn[0,1,17,2,1] x_kimjn[0,1,17,2,2] x_kimjn[0,1,17,2,9]
+ x_kimjn[0,1,17,2,12] x_kimjn[0,1,17,2,10] x_kimjn[0,1,17,2,5]
+ x_kimjn[0,1,17,2,6] x_kimjn[0,1,17,2,7] x_kimjn[0,1,17,2,8]
+ x_kimjn[0,1,17,2,13] x_kimjn[0,1,17,2,0] x_kimjn[0,1,17,3,0]
+ x_kimjn[0,1,17,4,0] x_kimjn[0,1,0,2,1] x_kimjn[0,1,0,2,2]
+ x_kimjn[0,1,0,2,9] x_kimjn[0,1,0,2,12] x_kimjn[0,1,0,2,10]
+ x_kimjn[0,1,0,2,5] x_kimjn[0,1,0,2,6] x_kimjn[0,1,0,2,7]
+ x_kimjn[0,1,0,2,8] x_kimjn[0,1,0,2,13] x_kimjn[0,1,0,2,0]
+ x_kimjn[0,1,0,3,0] x_kimjn[0,1,0,4,0] x_kimjn[0,2,1,1,17]
+ x_kimjn[0,2,1,1,0] x_kimjn[0,2,1,3,0] x_kimjn[0,2,1,4,0]
+ x_kimjn[0,2,2,1,17] x_kimjn[0,2,2,1,0] x_kimjn[0,2,2,3,0]
+ x_kimjn[0,2,2,4,0] x_kimjn[0,2,9,1,17] x_kimjn[0,2,9,1,0]
+ x_kimjn[0,2,9,3,0] x_kimjn[0,2,9,4,0] x_kimjn[0,2,12,1,17]
+ x_kimjn[0,2,12,1,0] x_kimjn[0,2,12,3,0] x_kimjn[0,2,12,4,0]
+ x_kimjn[0,2,10,1,17] x_kimjn[0,2,10,1,0] x_kimjn[0,2,10,3,0]
+ x_kimjn[0,2,10,4,0] x_kimjn[0,2,5,1,17] x_kimjn[0,2,5,1,0]
+ x_kimjn[0,2,5,3,0] x_kimjn[0,2,5,4,0] x_kimjn[0,2,6,1,17]
+ x_kimjn[0,2,6,1,0] x_kimjn[0,2,6,3,0] x_kimjn[0,2,6,4,0]
+ x_kimjn[0,2,7,1,17] x_kimjn[0,2,7,1,0] x_kimjn[0,2,7,3,0]
+ x_kimjn[0,2,7,4,0] x_kimjn[0,2,8,1,17] x_kimjn[0,2,8,1,0]
+ x_kimjn[0,2,8,3,0] x_kimjn[0,2,8,4,0] x_kimjn[0,2,13,1,17]
+ x_kimjn[0,2,13,1,0] x_kimjn[0,2,13,3,0] x_kimjn[0,2,13,4,0]
+ x_kimjn[0,2,0,1,17] x_kimjn[0,2,0,1,0] x_kimjn[0,2,0,3,0]
+ x_kimjn[0,2,0,4,0] x_kimjn[0,3,0,4,0] x_kimjn[0,4,0,3,0] xs_kim[0,1,17]
+ xs_kim[0,1,0] xs_kim[0,2,1] xs_kim[0,2,2] xs_kim[0,2,9] xs_kim[0,2,12]
+ xs_kim[0,2,10] xs_kim[0,2,5] xs_kim[0,2,6] xs_kim[0,2,7] xs_kim[0,2,8]
+ xs_kim[0,2,13] xs_kim[0,2,0] xod_k[0]
 End
