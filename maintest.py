@@ -73,7 +73,7 @@ def passenger_candidate_pickup_location_initialization():
         candidate_locations = []
         for location_pair in all_location_pairs:
             if location_pair[0] == passengers_json[passenger]["origin_location"] and location_pair[0]!=location_pair[1]:
-                if distance_matrix.distance_matrix[location_pair] <= 10:
+                if distance_matrix.distance_matrix[location_pair] <= 0.001:
                     candidate_locations.append(location_pair)
         result[passengers_json[passenger]["id"]] = candidate_locations
     return result
@@ -457,7 +457,7 @@ def add_constraints():
                      == z_ki[k, i] for k in D for i in PP)
     
    
-    model.addConstrs(xod_k[k] <= 1 - z_ki[k, i] for k in D for i in PP)
+    #model.addConstrs(xod_k[k] <= 1 - z_ki[k, i] for k in D for i in PP)
     model.addConstrs(xod_k[k] == 0 for k in D)
 
     """Coupling and precedence constraints"""
