@@ -40,6 +40,7 @@ coordinates = {
     "Hjelteryggen": (5.154482, 60.381361), "Skogsvåg": (5.097186, 60.25994), "Kleppestø": (5.135965, 60.18781), "Solsvik": (4.966409, 60.431002), "Rongøy": (4.915516, 60.507616), "Hammersland": (5.068799, 60.25957), "Træsneset": (5.067745, 60.227445),
     "Tofterøy": (5.05251, 60.18589), "Bergenhus": (5.326163, 60.395), "Laksevåg": (5.265, 60.379), "Ytrebygda": (5.259, 60.291), "Årstad": (5.352, 60.3635)
 }
+indexed_coordinates = {y: x for x, y in coordinates.items()}
 
 
 def passenger_candidate_pickup_location_initialization():
