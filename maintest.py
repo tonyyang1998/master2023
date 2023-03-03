@@ -35,33 +35,10 @@ location_index = {"Knappskog": 1, "Kolltveit":2, "Blomøy":3, "Hellesøy":4, "Fo
 index_location = {y: x for x, y in location_index.items()}
 
 coordinates = {
-    "Knappskog": (5.055929, 60.382878),
-    "Kolltveit": (5.087813, 60.352223),
-    "Kårtveit": (4.993453, 60.388651),
-    "Telavåg": (4.982022, 60.261564),
-    "Straume": (5.121333, 60.356561),
-    "Knarrevik": (5.153025, 60.368083),
-    "Bildøyna": (5.106085, 60.354085),
-    "Spjeld": (5.039608, 60.390343),
-    "Foldnes": (5.106568, 60.375988),
-    "Brattholmen": (5.152274, 60.354616),
-    "Blomøy": (4.892748, 60.538108),
-    "Hellesøy": (4.790867, 60.661021),
-    "Arefjord": (5.142463, 60.358855),
-    "Ebbesvik": (5.140128, 60.336068),
-    "Landro": (4.967209, 60.423365),
-    "Hjelteryggen": (5.154482, 60.381361),
-    "Skogsvåg": (5.097186, 60.25994),
-    "Kleppestø": (5.135965, 60.18781),
-    "Solsvik": (4.966409, 60.431002),
-    "Rongøy": (4.915516, 60.507616),
-    "Hammersland": (5.068799, 60.25957),
-    "Træsneset": (5.067745, 60.227445),
-    "Tofterøy": (5.05251, 60.18589),
-    "Bergenhus": (5.326163, 60.395),
-    "Laksevåg": (5.265, 60.379),
-    "Ytrebygda": (5.259, 60.291),
-    "Årstad": (5.352, 60.3635)
+    "Knappskog": (5.055929, 60.382878), "Kolltveit": (5.087813, 60.352223), "Kårtveit": (4.993453, 60.388651), "Telavåg": (4.982022, 60.261564), "Straume": (5.121333, 60.356561), "Knarrevik": (5.153025, 60.368083), "Bildøyna": (5.106085, 60.354085), "Spjeld": (5.039608, 60.390343), "Foldnes": (5.106568, 60.375988),
+    "Brattholmen": (5.152274, 60.354616), "Blomøy": (4.892748, 60.538108), "Hellesøy": (4.790867, 60.661021), "Arefjord": (5.142463, 60.358855), "Ebbesvik": (5.140128, 60.336068), "Landro": (4.967209, 60.423365),
+    "Hjelteryggen": (5.154482, 60.381361), "Skogsvåg": (5.097186, 60.25994), "Kleppestø": (5.135965, 60.18781), "Solsvik": (4.966409, 60.431002), "Rongøy": (4.915516, 60.507616), "Hammersland": (5.068799, 60.25957), "Træsneset": (5.067745, 60.227445),
+    "Tofterøy": (5.05251, 60.18589), "Bergenhus": (5.326163, 60.395), "Laksevåg": (5.265, 60.379), "Ytrebygda": (5.259, 60.291), "Årstad": (5.352, 60.3635)
 }
 
 
@@ -573,7 +550,7 @@ def sort_segments(segments):
     return sorted_segments
     
 
-def visualize():
+def get_result():
     arcs = {}
     arcsum = {}
     plt.figure(1)
@@ -595,8 +572,8 @@ def visualize():
             arc_sum += T_imjn[(arc[0], arc[1])]
        
         unsorted_path =  from_origin_to_destination + from_origins_arcs + between_ridesharing_arcs + from_delivery_to_destinations
-        #sorted_segments = sort_segments(unsorted_path)
-        arcs[k] = unsorted_path
+        sorted_segments = sort_segments(unsorted_path)
+        arcs[k] = sorted_segments
         arcsum[k] = arc_sum
     
 
@@ -713,9 +690,14 @@ def visualize():
                     stedsnavn2 = drivers_json["D" + str(arc[1][0] - nr_drivers - 2*nr_passengers)]["destination_location"]
                     path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1], coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
         paths[driver] = path_in_coordinates
-    
 
     return arcs, paths
+
+
+def visualize(path):
+
+    
+
 
 def debug():
     model.computeIIS()
@@ -728,7 +710,7 @@ def run_only_once():
     #debug()
     #print(model.objVal)
     #print(x_kimjn.select())
-    arcs, paths = visualize()
+    arcs, paths = get_result()
     #plt.show()    
     return arcs
     
