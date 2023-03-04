@@ -389,7 +389,7 @@ def set_variables():
     model.update()
     xe_kjn = model.addVars([(k, j, n) for k in D for (j, n) in ND], vtype=GRB.BINARY, name='xe_kjn')
     model.update()
-    xod_k = model.addVars([k for k in D], vtype=GRB.BINARY, name='xod_k')
+    xod_k = model.addVars(D, vtype=GRB.BINARY, name='xod_k')
     model.update()
     yp_kim = model.addVars([(k, i, m) for (i, m) in NP for k in D], vtype=GRB.BINARY, name='yp_kim')
     model.update()
@@ -422,7 +422,7 @@ def add_constraints():
     model.addConstrs(quicksum(xs_kim[k, i, m] for (i, m) in NP) + xod_k[k] == 1 for k in D)
     model.addConstrs(quicksum(xe_kjn[k, j, n] for (j, n) in ND) + xod_k[k] == 1 for k in D)
 
-    model.addConstrs((xs_kim[k, i, m] + quicksum(x_kimjn[k, j, n, i, m] for (j, n) in NP if ((j, n), (i, m)) in A_k[k]) == quicksum(x_kimjn[k, i, m, j, n] for (j, n) in NR if ((i, m), (j, n)) in A_k[k]) for k in D for (i, m) in NP), name = "(4.5)")
+    model.addConstrs(xs_kim[k, i, m] + quicksum(x_kimjn[k, j, n, i, m] for (j, n) in NP if ((j, n), (i, m)) in A_k[k]) == quicksum(x_kimjn[k, i, m, j, n] for (j, n) in NR if ((i, m), (j, n)) in A_k[k]) for k in D for (i, m) in NP)
     model.addConstrs((xe_kjn[k, j, n] + quicksum(x_kimjn[k, j, n, i, m] for (i, m) in ND if ((j, n), (i, m)) in A_k[k]) == quicksum(x_kimjn[k, i, m, j, n] for (i,m) in NR if ((i, m), (j, n)) in A_k[k]) for k in D for (j, n) in ND), name = "(4.6)")
 
     model.addConstrs((xs_kim[k, i, m] + quicksum(x_kimjn[k, j, n, i, m] for (j, n) in NP if ((j, n), (i, m)) in A_k[k]) - yp_kim[k, i, m] == 0 for k in D for (i, m) in NP),  name = "(4.7)")
@@ -437,8 +437,10 @@ def add_constraints():
                      == z_ki[k, i] for k in D for i in PP)
     
    
-    #model.addConstrs(xod_k[k] <= 1 - z_ki[k, i] for k in D for i in PP)
-    model.addConstrs(xod_k[k] == 0 for k in D)
+
+    model.addConstrs(xod_k[k] <= 1 - z_ki[k, i] for k in D for i in PP)
+    
+    #model.addConstrs(xod_k[k] == 0 for k in D)
 
 
 
@@ -551,6 +553,18 @@ def sort_segments(segments):
     return sorted_segments
     
 
+def create_path(arc_path):
+    result = {}
+    for driver_id, path in arc_path.items():
+        nodes = [p[0] for p in path] + [path[-1][1]]
+        result[driver_id] = [nodes[0]]
+        for i in range(len(nodes)-1):
+            if nodes[i] == result[driver_id][-1]:
+                result[driver_id].append(nodes[i+1])
+        result[driver_id] = list(set(result[driver_id]))
+        result[driver_id].sort(key=lambda x: nodes.index(x))
+    return result
+
 def get_result():
     arcs = {}
     arcsum = {}
@@ -586,7 +600,8 @@ def get_result():
             if arc[0] == o_k[driver] and arc[1] == d_k[driver]:
                 stedsnavn1 = drivers_json["D" + str(arc[0][0])]["origin_location"]
                 stedsnavn2 = drivers_json["D" + str(arc[0][0])]["destination_location"]
-                path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1], coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
+                path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
+                path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
                 
 
             """Between driver origin and all pick up candidate locations """
@@ -595,106 +610,157 @@ def get_result():
                 if arc[1][1]!=0:
                     stedsnavn1 = drivers_json["D" + str(arc[0][0])]["origin_location"]
                     stedsnavn2 = index_location[arc[1][1]]
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1], coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
-
+                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
                 else:   
                     """If pick up node is (j, 0)""" 
                     stedsnavn1 = drivers_json["D" + str(arc[0][0])]["origin_location"]
                     stedsnavn2 = passengers_json["P" + str(arc[1][0])]["origin_location"]   
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1], coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
-
+                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
             """Between all pick up nodes"""
             if arc[0][0] in PP and arc[1][0] in PP:
                 """Between origins"""
                 if arc[0][1] == 0 and arc[1][1] == 0:      
                     stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
                     stedsnavn2 = passengers_json["P" + str(arc[1][0])]["origin_location"]
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1], coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
-
+                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
                 """From origin to candidate pick up """
                 if arc[0][1] == 0 and arc[1][1] != 0:
                     stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
                     stedsnavn2 = index_location[arc[1][1]]
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1], coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
-
+                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
                 """Between candidate pick ups"""
                 if arc[0][1] != 0 and arc[1][1] != 0:
                     stedsnavn1 = index_location[arc[0][1]]
                     stedsnavn2 = index_location[arc[1][1]]
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1], coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
-
+                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
                 """From candidate pick up to origin"""
                 if arc[0][1] != 0 and arc[1][1] == 0:
                     stedsnavn1 = index_location[arc[0][1]]
                     stedsnavn2 = passengers_json["P" + str(arc[1][0])]["origin_location"]
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1], coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))            
             """Between pick up and delivery nodes"""
             if arc[0][0] in PP and arc[1][0] in PD:
                 """Between origin and destination"""
                 if arc[0][1] == 0 and arc[1][1] == 0:      
                     stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
                     stedsnavn2 = passengers_json["P" + str(arc[1][0] - nr_passengers)]["destination_location"]
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1], coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
-
+                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
                     
                 """From origin to candidate delivery (Ingen candidate deliveries atm) """
                 if arc[0][1] == 0 and arc[1][1] != 0:
                     stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
                     stedsnavn2 = index_location[arc[1][1]]
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1], coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))                
                 """Between candidate pick up to candidate delivery"""
                 
                 if arc[0][1] != 0 and arc[1][1] != 0:
          
                     stedsnavn1 = index_location[arc[0][1]]
                     stedsnavn2 = index_location[arc[1][1]]
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1], coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))                    
                 """From candidate pick up to destination"""
                 if arc[0][1] != 0 and arc[1][1] == 0:
                     stedsnavn1 = index_location[arc[0][1]]
                     stedsnavn2 = passengers_json["P" + str(arc[1][0] - nr_passengers)]["destination_location"]
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1], coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
-
+                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
             """Between all delivery nodes"""
             if arc[0][0] in PD and arc[1][0] in PD:
                 """Between destinations"""
                 if arc[0][1] == 0 and arc[1][1] == 0:      
                     stedsnavn1 = passengers_json["P" + str(arc[0][0] - nr_passengers)]["destination_location"]
                     stedsnavn2 = passengers_json["P" + str(arc[1][0] - nr_passengers)]["destination_location"]
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1], coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))                
                 """From destination to candidate delivery (Ingen candidate deliveries atm) """
                 if arc[0][1] == 0 and arc[1][1] != 0:
                     stedsnavn1 = passengers_json["P" + str(arc[0][0] - nr_passengers)]["destination_location"]
                     stedsnavn2 = index_location[arc[1][1]]
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1], coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
+
                 """Between candidate pick up and candidate deliveries"""
                 if arc[0][1] != 0 and arc[1][1] != 0:
                     stedsnavn1 = index_location[arc[0][1]]
                     stedsnavn2 = index_location[arc[1][1]]
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1], coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))                
                 """From candidate delivery to destination"""
                 if arc[0][1] != 0 and arc[1][1] == 0:
                     stedsnavn1 = index_location[arc[0][1]]
                     stedsnavn2 = passengers_json["P" + str(arc[1][0] - nr_passengers)]["destination_location"]
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1], coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
-
+                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
             """From candidate delivery to driver destination"""
             if arc[0][0] in PD and arc[1] == d_k[driver]:
                 """Between passenger destinations and driver destination"""
                 if arc[0][1] == 0 and arc[1][1] == 0:      
                     stedsnavn1 = passengers_json["P" + str(arc[0][0] - nr_passengers)]["destination_location"]
                     stedsnavn2 = drivers_json["D" + str(arc[1][0] - nr_drivers - 2*nr_passengers)]["destination_location"]
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1], coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))                
                 """From candidate delivery to driver destination"""
                 if arc[0][1] != 0 and arc[1][1] == 0:
                     stedsnavn1 = index_location[arc[0][1]]
                     stedsnavn2 = drivers_json["D" + str(arc[1][0] - nr_drivers - 2*nr_passengers)]["destination_location"]
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1], coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
-        paths[driver] = path_in_coordinates
+                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
+                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))    
 
+        
+        paths[driver] = path_in_coordinates
+    
+    arcs = create_path(arcs)
     return arcs, paths
 
 
+# Define colors for different node types
+colors = {'start': 'red', 'pickup': 'blue', 'delivery': 'turquoise', 'end': 'limegreen'}
+
+def plot_path(path, nodes_visited):
+    fig, ax = plt.subplots(figsize=(8, 6))
+    pickup_coords = {}
+    for driver, pickup_list in nodes_visited.items():
+        for pickup in pickup_list:
+            passenger_num = pickup[0]
+            pickup_index = pickup_list.index(pickup)
+            pickup_coord = path[driver][pickup_index]
+            pickup_coords[pickup_coord] = f"P{passenger_num}"
+    for driver, nodes in path.items():
+        n = len(nodes)
+        for i, node in enumerate(nodes):
+            node_type = ''
+            if i == 0:
+                node_type = 'start'
+                plt.annotate(f"DS{driver}", (node[0], node[1]))
+            elif i == n - 1:
+                node_type = 'end'
+                plt.annotate(f"DE{driver}", (node[0], node[1]))
+            elif i < n/2:
+                node_type = 'pickup'
+                if node in pickup_coords:
+                    plt.annotate(pickup_coords[node], (node[0], node[1]))
+            else:
+                node_type = 'delivery'
+            plt.scatter(node[0], node[1], color=colors[node_type])
+
+        # Plot the paths between the nodes for each driver
+        for i in range(len(nodes) - 1):
+            plt.plot([nodes[i][0], nodes[i+1][0]], [nodes[i][1], nodes[i+1][1]], color='black')
+    ax.set_xlabel("Longitude")
+    ax.set_ylabel("Latitude")
+    ax.set_title("Driver Paths")
+    ax.set_xlim([4.757513, 5.393347])
+    ax.set_ylim([60.150511, 60.672624])
+    
 
 def debug():
     model.computeIIS()
@@ -705,11 +771,11 @@ def debug():
 def run_only_once():
     optimize()
     #debug()
-    #print(model.objVal)
-    #print(x_kimjn.select())
     arcs, paths = get_result()
-    #plt.show()    
-    return arcs
+    print(paths)
+    plot_path(paths, arcs)
+    plt.show()    
+    return arcs, paths
     
 print("SETS")
 print("D:", D)
@@ -728,6 +794,9 @@ print("d_k:", d_k)
 print("T_k:", T_k)
 print("T_imjn:", T_imjn)
 print("T_im:", T_im)
+print("Ak1:", A_i1)
+print("Ak2:", A_i2)
+print("Q_k:", Q_k)
 
 print(run_only_once())
 

@@ -17,7 +17,7 @@ def create_path(arc_path):
     return result
 
 
-#print(create_path(arc_path))
+print(create_path(arc_path))
 
 
 path = {
@@ -97,6 +97,6 @@ def plot_path(path, nodes_visited):
     plt.show()
 
 
-#plot_path(path, nodes_visited)
+plot_path(path, nodes_visited)
 
 
