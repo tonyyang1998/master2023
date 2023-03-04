@@ -1,5 +1,25 @@
 import matplotlib.pyplot as plt
 
+
+arc_path = {0: [((0, 4), (3, 2)), ((3, 2), (4, 1)), ((4, 1), (2, 0)), ((2, 0), (5, 0)), ((5,0), (8,1))], 
+            1: [((10, 11), (12, 13)), ((12, 13), (15, 3)), ((15, 3), (16, 11)), ((16, 11), (18, 19)), ((18, 19), (6,1)), ((6,1), (7,1)), ((7,1),(9,3))]}
+
+def create_path(arc_path):
+    result = {}
+    for driver_id, path in arc_path.items():
+        nodes = [p[0] for p in path] + [path[-1][1]]
+        result[driver_id] = [nodes[0]]
+        for i in range(len(nodes)-1):
+            if nodes[i] == result[driver_id][-1]:
+                result[driver_id].append(nodes[i+1])
+        result[driver_id] = list(set(result[driver_id]))
+        result[driver_id].sort(key=lambda x: nodes.index(x))
+    return result
+
+
+#print(create_path(arc_path))
+
+
 path = {
     0: [
         (4.790867, 60.661021),
@@ -77,6 +97,6 @@ def plot_path(path, nodes_visited):
     plt.show()
 
 
-plot_path(path, nodes_visited)
+#plot_path(path, nodes_visited)
 
 
