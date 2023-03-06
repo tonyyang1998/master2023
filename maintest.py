@@ -48,9 +48,10 @@ def passenger_candidate_pickup_location_initialization():
     result = {}
     for passenger in passengers_json:
         candidate_locations = []
+        mobility_flex = 5
         for location_pair in all_location_pairs:
             if location_pair[0] == passengers_json[passenger]["origin_location"] and location_pair[0]!=location_pair[1]:
-                if distance_matrix.distance_matrix[location_pair] <= 5 and location_pair[1] != 'Laksevåg' and location_pair[1] != 'Ytrebygda' and location_pair[1] != 'Bergenhus' and location_pair[1] != 'Årstad':
+                if distance_matrix.distance_matrix[location_pair] <= mobility_flex and location_pair[1] != 'Laksevåg' and location_pair[1] != 'Ytrebygda' and location_pair[1] != 'Bergenhus' and location_pair[1] != 'Årstad':
                     candidate_locations.append(location_pair)
         result[passengers_json[passenger]["id"]] = candidate_locations
     return result
