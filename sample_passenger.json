@@ -6,5 +6,13 @@
     "lower_tw": 120,
     "upper_tw": 150,
     "max_ride_time": 100.0
+  },
+  "P2": {
+    "id": 2,
+    "origin_location": "Knarrevik",
+    "destination_location": "Laksev\u00e5g",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 101.0
   }
 }
