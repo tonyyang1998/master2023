@@ -117,7 +117,7 @@ N = list(driver_origin_nodes.values()) + NR + list(driver_destination_nodes.valu
 
 def initialize_Ak():
     result = {}
-    Ak = {k: [((i,m),(j,n)) for (i,m) in NR + [o_k[k]] for (j,n) in [o_k[k]] + NR + [d_k[k]] if ((i,m)!=(j,n))] for k in D}
+    Ak = {k: [((i,m),(j,n)) for (i,m) in NR + [o_k[k]] for (j,n) in [o_k[k]] + NR + [d_k[k]]] for k in D}
     for driver in Ak:
         all_ar = list(Ak[driver])
         all_arcs = all_ar
@@ -758,10 +758,7 @@ def debug():
 
 def run_only_once():
     optimize()
-    print("TITMITMTIMTIT")
-    print(T_im)
-    print("TIMJN")
-    print(T_imjn)
+
    
     #debug()
     arcs, paths = get_result()

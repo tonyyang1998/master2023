@@ -1,18 +1,34 @@
 {
   "P1": {
     "id": 1,
+    "origin_location": "Knappskog",
+    "destination_location": "Bergenhus",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 54.0
+  },
+  "P2": {
+    "id": 2,
+    "origin_location": "Spjeld",
+    "destination_location": "\u00c5rstad",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 58.0
+  },
+  "P3": {
+    "id": 3,
     "origin_location": "Solsvik",
     "destination_location": "Laksev\u00e5g",
     "lower_tw": 120,
     "upper_tw": 150,
-    "max_ride_time": 128.0
+    "max_ride_time": 64.0
   },
-  "P2": {
-    "id": 2,
-    "origin_location": "Straume",
-    "destination_location": "Bergenhus",
+  "P4": {
+    "id": 4,
+    "origin_location": "Spjeld",
+    "destination_location": "Laksev\u00e5g",
     "lower_tw": 120,
     "upper_tw": 150,
-    "max_ride_time": 88.0
+    "max_ride_time": 42.0
   }
 }
