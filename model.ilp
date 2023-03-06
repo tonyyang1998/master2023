@@ -3,9 +3,9 @@
 Maximize
  
 Subject To
- ny2: x_kimjn[0,1,0,2,0] = 1
- 4.13[0,1]: 2 x_kimjn[0,1,0,2,0] = 0
+ R934: yp_kim[0,2,0] = 1
+ R960: 0.1 yp_kim[0,2,0] <= 0
 Bounds
 Binaries
- x_kimjn[0,1,0,2,0]
+ yp_kim[0,2,0]
 End

@@ -1,10 +1,19 @@
 {
   "P1": {
     "id": 1,
-    "origin_location": "Knarrevik",
+    "origin_location": "Solsvik",
+    "destination_location": "Laksev\u00e5g",
+    "lower_tw": 120,
+    "upper_tw": 150,
+    "max_ride_time": 128.0
+  },
+  "P2": {
+    "id": 2,
+    "origin_location": "Straume",
     "destination_location": "Bergenhus",
     "lower_tw": 120,
     "upper_tw": 150,
+<<<<<<< HEAD
     "max_ride_time": 100.0
   },
   "P2": {
@@ -14,5 +23,8 @@
     "lower_tw": 120,
     "upper_tw": 150,
     "max_ride_time": 101.0
+=======
+    "max_ride_time": 88.0
+>>>>>>> a711f7e3eee54bf395267a15ee3b4812d0fc3525
   }
 }

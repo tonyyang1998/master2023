@@ -1,11 +1,16 @@
 {
   "D0": {
     "id": 0,
+<<<<<<< HEAD
     "origin_location": "Kolltveit",
     "destination_location": "Laksev\u00e5g",
+=======
+    "origin_location": "Landro",
+    "destination_location": "\u00c5rstad",
+>>>>>>> a711f7e3eee54bf395267a15ee3b4812d0fc3525
     "lower_tw": 120,
     "upper_tw": 150,
-    "max_ride_time": 100.0,
+    "max_ride_time": 148.0,
     "max_capacity": 4.0
   }
 }

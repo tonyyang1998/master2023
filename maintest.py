@@ -10,7 +10,7 @@ from xlwt import Workbook
 import distance_matrix 
 
 
-filename = "test_instance.xlsx"
+filename = "test_instance1.xlsx"
 #file_to_save = 'Results/Small Instances 1,5/Small_4,1.5.xls'
 
 te.main(filename)
@@ -46,12 +46,11 @@ indexed_coordinates = {y: x for x, y in coordinates.items()}
 def passenger_candidate_pickup_location_initialization():
     all_location_pairs = distance_matrix.distance_matrix.keys()
     result = {}
-    
     for passenger in passengers_json:
         candidate_locations = []
         for location_pair in all_location_pairs:
             if location_pair[0] == passengers_json[passenger]["origin_location"] and location_pair[0]!=location_pair[1]:
-                if distance_matrix.distance_matrix[location_pair] <= 0.001:
+                if distance_matrix.distance_matrix[location_pair] <= 5 and location_pair[1] != 'Laksevåg' and location_pair[1] != 'Ytrebygda' and location_pair[1] != 'Bergenhus' and location_pair[1] != 'Årstad':
                     candidate_locations.append(location_pair)
         result[passengers_json[passenger]["id"]] = candidate_locations
     return result
@@ -62,6 +61,7 @@ def initialize_MPi():
     for passenger in locations:
         result = []
         for location_pair in locations[passenger]:
+            
             result.append(location_index[location_pair[1]])
         if 0 not in result:
             result.append(0)
@@ -116,7 +116,7 @@ N = list(driver_origin_nodes.values()) + NR + list(driver_destination_nodes.valu
 
 def initialize_Ak():
     result = {}
-    Ak = {k: [((i,m),(j,n)) for (i,m) in NR + [o_k[k]] for (j,n) in NR + [d_k[k]] if ((i,m)!=(j,n))] for k in D}
+    Ak = {k: [((i,m),(j,n)) for (i,m) in NR + [o_k[k]] for (j,n) in [o_k[k]] + NR + [d_k[k]] if ((i,m)!=(j,n))] for k in D}
     for driver in Ak:
         all_ar = list(Ak[driver])
         all_arcs = all_ar
@@ -142,12 +142,22 @@ def initialize_Ak():
 A_k = initialize_Ak()
 
 
-
 def initialize_Timjn():
     T_imjn = {}
    
     for driver in A_k:
         for arc in A_k[driver]:
+            """From passenger pick ups to driver origins"""
+            if arc[0] in NP and arc[1] == o_k[driver]:
+                if (arc[0][1] == 0):
+                    stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
+                    stedsnavn2 = drivers_json["D" + str(arc[1][0])]["origin_location"]
+                    distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
+                    T_imjn[arc] = distance
+
+
+
+
             """Between driver origin and and destination"""
             if arc[0] == o_k[driver] and arc[1] == d_k[driver]:
                 stedsnavn1 = drivers_json["D" + str(arc[0][0])]["origin_location"]
@@ -281,13 +291,19 @@ def initialize_Tim():
     Tim = {}
     visited_nodes = []
     arcs = list(T_imjn.keys())
+
     for arc in arcs:
         node1 = arc[0]
         node2 = arc[1]
         if node1 not in visited_nodes:
+            """If it is a driver origin"""
+            if node1[0] in D:
+                Tim[node1] = 0
+                visited_nodes.append(node1)
+
             """If pick up node1 is (i, 0)"""
             if node1[0] in PP and node1[1] == 0:
-                Tim[node1] = 0.1 
+                Tim[node1] = 0
                 visited_nodes.append(node1)
             """If pick up node1 is (i, x)"""
             if node1[0] in PP and node1[1] != 0:
@@ -299,7 +315,7 @@ def initialize_Tim():
 
             """If delivery node1 is (j, 0)"""
             if node1[0] in PD and node1[1] == 0:
-                Tim[node1] = 0.1 
+                Tim[node1] = 0
                 visited_nodes.append(node1)
             """If delivery node1 is (j, x)"""
             if node1[0] in PD and node1[1] != 0:
@@ -310,9 +326,15 @@ def initialize_Tim():
                 visited_nodes.append(node1)
 
         if node2 not in visited_nodes:
+            """If it is a driver destination"""
+            if node2 in list(d_k.values()):
+                Tim[node2] = 0
+                visited_nodes.append(node2)
+
+
             """If pick up node2 is (i, 0)"""
             if node2[0] in PP and node2[1] == 0:
-                Tim[node2] = 0.1 
+                Tim[node2] = 0
                 visited_nodes.append(node2)
             """If pick up node2 is (i, x)"""
             if node2[0] in PP and node2[1] != 0:
@@ -324,7 +346,7 @@ def initialize_Tim():
 
             """If delivery node2 is (j, 0)"""
             if node2[0] in PD and node2[1] == 0:
-                Tim[node2] = 0.1 
+                Tim[node2] = 0
                 visited_nodes.append(node2)
             """If delivery node2 is (j, x)"""
             if node2[0] in PD and node2[1] != 0:
@@ -376,12 +398,9 @@ M = initialize_big_M()
 
 
 
-
-
 """Variables"""
 
 model = Model('RRP')
-
 
 def set_variables():
     x_kimjn = model.addVars([(k, i, m, j, n) for k in D for (i, m) in NR for (j, n) in NR], vtype=GRB.BINARY, name='x_kimjn')
@@ -392,22 +411,24 @@ def set_variables():
     model.update()
     xod_k = model.addVars(D, vtype=GRB.BINARY, name='xod_k')
     model.update()
-    y_kim = model.addVars([(k, i, m) for (i, m) in NP + ND for k in D], vtype=GRB.BINARY, name='yp_kim')
+    y_kim = model.addVars([(k, i, m) for (i, m) in list(o_k.values()) + NP + ND + list(d_k.values()) for k in D], vtype=GRB.BINARY, name='yp_kim')
     model.update()
     z_ki = model.addVars([(k, i) for k in D for i in PP], vtype=GRB.BINARY, name='z_ki')
     model.update()
-    t_kim = model.addVars([(k, i, m) for k in D for (i, m) in N], vtype=GRB.CONTINUOUS, name='t_ki')
+    t_kim = model.addVars([(k, i, m) for k in D for (i, m) in N], vtype=GRB.CONTINUOUS, name='t_kim')
     model.update()
     return x_kimjn, xs_kim, xe_kjn, xod_k, y_kim, z_ki, t_kim
 
 x_kimjn, xs_kim, xe_kjn, xod_k, y_kim, z_ki, t_kim = set_variables()
 
+
+
 """Objective"""
 def set_objective():
     model.ModelSense = GRB.MAXIMIZE
-    model.setObjective(quicksum(z_ki[k, i] for k in D for i in PP))
-    #model.setObjectiveN(quicksum(z_ki[k, i] for k in D for i in PP), index = 0, priority = 1)
-    #model.setObjectiveN(- quicksum((t_kim[k, d_k[k][0], d_k[k][1]] - (t_kim[k, o_k[k][0], o_k[k][1]]) for k in D)) - quicksum((t_kim[k, nr_passengers + i, 0] - t_kim[k, i, 0]) for k in D for i in PP), index = 1, priority = 0)
+    #model.setObjective(quicksum(z_ki[k, i] for k in D for i in PP))
+    model.setObjectiveN(quicksum(z_ki[k, i] for k in D for i in PP), index = 0, priority = 1)
+    model.setObjectiveN(- (quicksum((t_kim[k, d_k[k][0], d_k[k][1]] - (t_kim[k, o_k[k][0], o_k[k][1]]) for k in D))) - (quicksum((t_kim[k, nr_passengers + i, 0] - t_kim[k, i, 0]) for k in D for i in PP)), index = 1, priority = 0)
     model.update()
 
 set_objective()
@@ -439,25 +460,24 @@ def add_constraints():
     """Coupling and precedence constraints"""
     model.addConstrs((quicksum(y_kim[k, i, m] for m in MP_i[i]) == quicksum(y_kim[k, nr_passengers + i, m] for m in [MD_i[i]]) for k in D for i in PP), name = "4.12")
 
-
-    #model.addConstrs((quicksum(x_kimjn[k, i, m, j, n] for (j, n) in NR for m in MP_i[i] if ((i, m), (j, n)) in A_k[k]) + quicksum(x_kimjn[k, j, n, nr_passengers + i, m] for (j,n) in NR for m in [MD_i[i]] if ((j, n), (nr_passengers + i, m)) in A_k[k]) == 0 for k in D for i in PP), name = "4.13")
-    #model.addConstrs(t_kim[k, i, m] + T_imjn[(i, m), (nr_passengers + i, n)] - t_kim[k, nr_passengers + i, n] <= 0 for k in D for (i, m) in NP for o in PP for n in [MD_i[o]])
+    model.addConstrs(t_kim[k, i, m] + T_imjn[(i, m), (nr_passengers + i, n)] - t_kim[k, nr_passengers + i, n] <= 0 for k in D for (i, m) in NP for o in PP for n in [MD_i[o]])
 
     """Time constraint"""
+<<<<<<< HEAD
     """model.addConstrs(
         t_kim[k, i, m] + T_imjn[(i, m), (j, n)] - t_kim[k, j, n] - M[k] *(1 - x_kimjn[k, i, m, j, n]) <= 0 for k in D for (i, m) in NR for (j, n) in NR if ((i, m), (j, n)) in A_k[k])
     model.addConstrs(
         t_kim[k, i, m] + T_imjn[(i, m), (j, n)] - t_kim[k, j, n] + M[k] *(1 - x_kimjn[k, i, m, j, n]) >= 0 for k in D for (i, m) in NR for (j, n) in NR if ((i, m), (j, n)) in A_k[k])
+=======
+    model.addConstrs(t_kim[k, i, m] + T_imjn[(i, m), (j, n)] - t_kim[k, j, n] - M[k] *(1 - x_kimjn[k, i, m, j, n]) <= 0 for k in D for (i, m) in NR for (j, n) in NR if ((i, m), (j, n)) in A_k[k])
+    model.addConstrs(t_kim[k, i, m] + T_imjn[(i, m), (j, n)] - t_kim[k, j, n] + M[k] *(1 - x_kimjn[k, i, m, j, n]) >= 0 for k in D for (i, m) in NR for (j, n) in NR if ((i, m), (j, n)) in A_k[k])
+>>>>>>> a711f7e3eee54bf395267a15ee3b4812d0fc3525
 
-    model.addConstrs(
-        t_kim[k, o_k[k][0], o_k[k][1]] + T_imjn[(o_k[k][0],o_k[k][1]), (i, m)] - t_kim[k, i, m] - M[k] *(1 - xs_kim[k, i, m]) <= 0 for k in D for (i, m) in NP)
-    model.addConstrs(
-        t_kim[k, o_k[k][0], o_k[k][1]] + T_imjn[(o_k[k][0],o_k[k][1]), (i, m)] - t_kim[k, i, m] + M[k] *(1 - xs_kim[k, i, m]) >= 0 for k in D for (i, m) in NP)
+    model.addConstrs(t_kim[k, o_k[k][0], o_k[k][1]] + T_imjn[(o_k[k][0],o_k[k][1]), (i, m)] - t_kim[k, i, m] - M[k] *(1 - xs_kim[k, i, m]) <= 0 for k in D for (i, m) in NP)
+    model.addConstrs(t_kim[k, o_k[k][0], o_k[k][1]] + T_imjn[(o_k[k][0],o_k[k][1]), (i, m)] - t_kim[k, i, m] + M[k] *(1 - xs_kim[k, i, m]) >= 0 for k in D for (i, m) in NP)
 
-    model.addConstrs(
-        t_kim[k, i, m] + T_imjn[(i, m), (d_k[k][0], d_k[k][1])] - t_kim[k, d_k[k][0], d_k[k][1]] - M[k] *(1 - xe_kjn[k, i, m]) <= 0 for k in D for (i, m) in ND)
-    model.addConstrs(
-        t_kim[k, i, m] + T_imjn[(i, m), (d_k[k][0], d_k[k][1])] - t_kim[k, d_k[k][0], d_k[k][1]] + M[k] *(1 - xe_kjn[k, i, m]) >= 0 for k in D for (i, m) in ND)
+    model.addConstrs(t_kim[k, i, m] + T_imjn[(i, m), (d_k[k][0], d_k[k][1])] - t_kim[k, d_k[k][0], d_k[k][1]] - M[k] *(1 - xe_kjn[k, i, m]) <= 0 for k in D for (i, m) in ND)
+    model.addConstrs(t_kim[k, i, m] + T_imjn[(i, m), (d_k[k][0], d_k[k][1])] - t_kim[k, d_k[k][0], d_k[k][1]] + M[k] *(1 - xe_kjn[k, i, m]) >= 0 for k in D for (i, m) in ND)
 
     model.addConstrs(A_i1[i] <= t_kim[k, nr_passengers + i, 0] + T_im[nr_passengers + i, 0] for k in D for i in PP)
     model.addConstrs(t_kim[k, nr_passengers + i, 0] + T_im[nr_passengers + i, 0] <= A_i2[nr_passengers] for k in D for i in PP)
@@ -467,15 +487,29 @@ def add_constraints():
 
     disposable1 = model.addConstrs(t_kim[k, nr_passengers + i, 0] - t_kim[k, i, 0] <= T_k[i] for k in D for i in PP)
     disposable2 = model.addConstrs(t_kim[k, d_k[k][0], d_k[k][1]] - t_kim[k, o_k[k][0], o_k[k][1]] <= T_k[k] for k in D)
+<<<<<<< HEAD
     
     #model.addConstrs(t_kim[k, i, 0] <= t_kim[k, i, m] - (T_im[i, m] * yp_kim[k, i, m]) for k in D for (i, m) in NP + [o_k[k]])
     #model.addConstrs(t_kim[k, i, 0] >= t_kim[k, i, m] + (T_im[i, m] * yd_kim[k, i, m]) for k in D for (i, m) in ND + [d_k[k]])"""
+=======
+
+
+    model.addConstrs(t_kim[k, i, 0] <= t_kim[k, i, m] - (T_im[i, m] * y_kim[k, i, m]) for k in D for i in PP for m in MP_i[i] if (i, m) in NP)
+    model.addConstrs(t_kim[k, i, 0] >= t_kim[k, i, m] + (T_im[i, m] * y_kim[k, i, m]) for k in D for (i, m) in ND)
+
+  
+    model.addConstrs(t_kim[k, o_k[k][0], o_k[k][1]] <= t_kim[k, i, m] for k in D for (i, m) in NP + [d_k[k]])
+    model.addConstrs(t_kim[k, d_k[k][0], d_k[k][1]] >= t_kim[k, i, m] for k in D for (i, m) in ND + [o_k[k]])
+
+
+>>>>>>> a711f7e3eee54bf395267a15ee3b4812d0fc3525
 
     '''Capacity constraint'''
     model.addConstrs(quicksum(z_ki[k, i] for i in PP) <= Q_k[k] for k in D)
 
     model.update()
     return 
+
 
 
 """Optimize"""
@@ -736,6 +770,11 @@ def debug():
 
 def run_only_once():
     optimize()
+    print("TITMITMTIMTIT")
+    print(T_im)
+    print("TIMJN")
+    print(T_imjn)
+   
     #debug()
     arcs, paths = get_result()
     plot_path(paths, arcs)
