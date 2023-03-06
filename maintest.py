@@ -69,7 +69,8 @@ def initialize_MPi():
     return MP_i
 
 MP_i = initialize_MPi()
-#print(MP_i)
+
+
 MD_i = {i: 0 for i in PP}
 
 
@@ -374,7 +375,7 @@ def initialize_big_M():
 M = initialize_big_M()
 
 
-print(T_imjn)
+
 
 
 """Variables"""
@@ -413,7 +414,7 @@ set_objective()
 
 """Constraints"""
 
-print("MDi",MD_i)
+
 
 def add_constraints():
     '''Routing constraits'''
@@ -637,35 +638,6 @@ def get_result():
                     stedsnavn2 = passengers_json["P" + str(arc[1][0])]["origin_location"]
                     path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
                     path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))            
-            """Between pick up and delivery nodes"""
-            if arc[0][0] in PP and arc[1][0] in PD:
-                """Between origin and destination"""
-                if arc[0][1] == 0 and arc[1][1] == 0:      
-                    stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
-                    stedsnavn2 = passengers_json["P" + str(arc[1][0] - nr_passengers)]["destination_location"]
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
-                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
-                    
-                """From origin to candidate delivery (Ingen candidate deliveries atm) """
-                if arc[0][1] == 0 and arc[1][1] != 0:
-                    stedsnavn1 = passengers_json["P" + str(arc[0][0])]["origin_location"]
-                    stedsnavn2 = index_location[arc[1][1]]
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
-                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))                
-                """Between candidate pick up to candidate delivery"""
-                
-                if arc[0][1] != 0 and arc[1][1] != 0:
-         
-                    stedsnavn1 = index_location[arc[0][1]]
-                    stedsnavn2 = index_location[arc[1][1]]
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
-                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))                    
-                """From candidate pick up to destination"""
-                if arc[0][1] != 0 and arc[1][1] == 0:
-                    stedsnavn1 = index_location[arc[0][1]]
-                    stedsnavn2 = passengers_json["P" + str(arc[1][0] - nr_passengers)]["destination_location"]
-                    path_in_coordinates.append((coordinates[stedsnavn1][0],coordinates[stedsnavn1][1]))
-                    path_in_coordinates.append((coordinates[stedsnavn2][0], coordinates[stedsnavn2][1]))
             """Between all delivery nodes"""
             if arc[0][0] in PD and arc[1][0] in PD:
                 """Between destinations"""
@@ -710,6 +682,7 @@ def get_result():
 
         
         paths[driver] = path_in_coordinates
+
     
     arcs = create_path(arcs)
     return arcs, paths
@@ -763,17 +736,10 @@ def debug():
 
 def run_only_once():
     optimize()
-    print("ZKI")  
-    print("xs", xs_kim.select())
-    print("xkimjn", x_kimjn.select())
-    print("xe", xe_kjn.select())
-    print("ZKI", z_ki.select())
     #debug()
     arcs, paths = get_result()
-    print(paths)
     plot_path(paths, arcs)
     plt.show()  
-    
     return arcs, paths
     
 
