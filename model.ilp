@@ -3,11 +3,9 @@
 Maximize
  
 Subject To
- R0: xs_kim[0,1,0] + xod_k[0] = 1
- R2: - x_kimjn[0,1,0,2,0] + xs_kim[0,1,0] = 0
- R10: xod_k[0] = 0
- R11: 2 x_kimjn[0,1,0,2,0] = 0
+ ny2: x_kimjn[0,1,0,2,0] = 1
+ 4.13[0,1]: 2 x_kimjn[0,1,0,2,0] = 0
 Bounds
 Binaries
- x_kimjn[0,1,0,2,0] xs_kim[0,1,0] xod_k[0]
+ x_kimjn[0,1,0,2,0]
 End

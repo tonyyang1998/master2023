@@ -2,69 +2,67 @@ NAME RRP
 OBJSENSE MAX
 ROWS
  N  OBJ
- E  R0      
- E  R1      
- E  R2      
- E  (4.6)[0,2,0]
+ E  ny1     
+ E  ny2     
+ E  Ny3     
+ E  4.3[0]  
+ E  4.4[0]  
  E  (4.7)[0,1,0]
  E  (4.8)[2,0,0]
- L  R6      
- L  R7      
- E  R8      
- L  R9      
- E  R10     
- E  R11     
- L  R12     
- L  R13     
+ E  R7      
+ L  4.12[0,1]
+ E  4.11[0,1]
+ E  4.13[0,1]
+ L  R11     
 COLUMNS
     MARKER    'MARKER'                 'INTORG'
-    x_kimjn[0,1,0,1,0]  OBJ       0
-    x_kimjn[0,1,0,2,0]  R2        -1
-    x_kimjn[0,1,0,2,0]  (4.6)[0,2,0]  -1
-    x_kimjn[0,1,0,2,0]  R11       2
-    x_kimjn[0,2,0,1,0]  OBJ       0
-    x_kimjn[0,2,0,2,0]  OBJ       0
-    xs_kim[0,1,0]  R0        1
-    xs_kim[0,1,0]  R2        1
-    xs_kim[0,1,0]  (4.7)[0,1,0]  1
-    xs_kim[0,1,0]  R8        1
-    xe_kjn[0,2,0]  R1        1
-    xe_kjn[0,2,0]  (4.6)[0,2,0]  1
-    xe_kjn[0,2,0]  (4.8)[2,0,0]  1
-    xod_k[0]  R0        1
-    xod_k[0]  R1        1
-    xod_k[0]  R9        1
-    xod_k[0]  R10       1
-    yp_kim[0,1,0]  (4.7)[0,1,0]  -1
-    yp_kim[0,1,0]  R6        1
-    yd_kim[0,2,0]  (4.8)[2,0,0]  -1
-    yd_kim[0,2,0]  R7        1
-    z_ki[0,1]  OBJ       1
-    z_ki[0,1]  R8        -1
-    z_ki[0,1]  R9        1
-    z_ki[0,1]  R13       1
+    B0(0)     OBJ       0
+    B1(2)     ny2       1
+    B1(2)     4.13[0,1]  2
+    B2(0)     OBJ       0
+    B3(0)     OBJ       0
+    B4(3)     ny1       1
+    B4(3)     4.3[0]    1
+    B4(3)     (4.7)[0,1,0]  1
+    B5(3)     Ny3       1
+    B5(3)     4.4[0]    1
+    B5(3)     (4.8)[2,0,0]  1
+    B6(3)     4.3[0]    1
+    B6(3)     4.4[0]    1
+    B6(3)     4.12[0,1]  1
+    B7(2)     R7        1
+    B7(2)     4.11[0,1]  -1
+    B8(1)     R7        -1
+    B9(1)     (4.7)[0,1,0]  -1
+    B10(1)    (4.8)[2,0,0]  -1
+    B11(3)    OBJ       1
+    B11(3)    4.12[0,1]  1
+    B11(3)    4.11[0,1]  1
+    B11(3)    R11       1
     MARKER    'MARKER'                 'INTEND'
-    t_ki[0,0,0]  OBJ       0
-    t_ki[0,1,0]  R12       1
-    t_ki[0,2,0]  R12       -1
-    t_ki[0,3,0]  OBJ       0
+    C12(0)    OBJ       0
+    C13(0)    OBJ       0
+    C14(0)    OBJ       0
+    C15(0)    OBJ       0
 RHS
-    RHS1      R0        1
-    RHS1      R1        1
-    RHS1      R6        1
-    RHS1      R7        1
-    RHS1      R9        1
-    RHS1      R12       -18
-    RHS1      R13       4
+    RHS1      ny1       1
+    RHS1      ny2       1
+    RHS1      Ny3       1
+    RHS1      4.3[0]    1
+    RHS1      4.4[0]    1
+    RHS1      4.12[0,1]  1
+    RHS1      R11       4
 BOUNDS
- BV BND1      x_kimjn[0,1,0,1,0]
- BV BND1      x_kimjn[0,1,0,2,0]
- BV BND1      x_kimjn[0,2,0,1,0]
- BV BND1      x_kimjn[0,2,0,2,0]
- BV BND1      xs_kim[0,1,0]
- BV BND1      xe_kjn[0,2,0]
- BV BND1      xod_k[0]
- BV BND1      yp_kim[0,1,0]
- BV BND1      yd_kim[0,2,0]
- BV BND1      z_ki[0,1]
+ BV BND1      B0(0)   
+ BV BND1      B1(2)   
+ BV BND1      B2(0)   
+ BV BND1      B3(0)   
+ BV BND1      B4(3)   
+ BV BND1      B5(3)   
+ BV BND1      B6(3)   
+ BV BND1      B7(2)   
+ BV BND1      B8(1)   
+ BV BND1      B9(1)   
+ BV BND1      B10(1)  
+ BV BND1      B11(3)  
 ENDATA
