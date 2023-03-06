@@ -2,13 +2,15 @@ import pandas as pd
 import json
 
 
-def main(input):
+
+
+def main(book, sheet_name):
     
-    df2 = pd.read_excel(input)
+    df2 = pd.read_excel(book, sheet_name=sheet_name)
 
     capacity = df2['Capacity']
 
-    df3 = df2[['Rider','Origin location',  "Destination location", 'Max Ride time']]
+    df3 = df2[['Rider','Origin location',  "Destination location", 'Max ride time']]
 
     df1 = df3.dropna()
 
@@ -33,8 +35,8 @@ def main(input):
         object["origin_location"] = df["Origin location"][i]
         object["destination_location"] = df["Destination location"][i]
         object['lower_tw'] = 120
-        object['upper_tw'] = 150
-        object['max_ride_time'] = df['Max Ride time'][i]
+        object['upper_tw'] = 170
+        object['max_ride_time'] = df['Max ride time'][i]
         if riders[i] == 'Passenger':
             id_string = "P" +str(i) + ""
             sample_passenger[id_string] = object
@@ -48,4 +50,6 @@ def main(input):
 
     with open('sample_driver.json', 'w') as fp:
         json.dump(sample_driver, fp, indent=2)
+
+
 

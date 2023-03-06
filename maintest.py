@@ -9,11 +9,13 @@ import xlwt
 from xlwt import Workbook
 import distance_matrix 
 
+book = "Small1.xlsx"
+sheet_name = "Small2"
 
-filename = "test_instance1.xlsx"
+
 #file_to_save = 'Results/Small Instances 1,5/Small_4,1.5.xls'
 
-te.main(filename)
+te.main(book, sheet_name)
 start_time = time.time()
 passengers_json = json.load(open('sample_passenger.json'))
 drivers_json = json.load(open('sample_driver.json'))
@@ -495,7 +497,7 @@ def add_constraints():
     model.addConstrs(quicksum(z_ki[k, i] for i in PP) <= Q_k[k] for k in D)
 
     model.update()
-    return 
+    return disposable1, disposable2
 
 
 
@@ -762,7 +764,7 @@ def run_only_once():
     print("TIMJN")
     print(T_imjn)
    
-    #debug()
+    debug()
     arcs, paths = get_result()
     plot_path(paths, arcs)
     plt.show()  

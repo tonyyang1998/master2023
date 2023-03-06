@@ -1,11 +1,14 @@
 \ Model RRP_copy
 \ LP format - for model browsing. Use MPS format to capture full model detail.
-Maximize
- 
+Maximize multi-objectives
+  OBJ0: Priority=1 Weight=1 AbsTol=1e-06 RelTol=0
+  
+  OBJ1: Priority=0 Weight=1 AbsTol=1e-06 RelTol=0
+   t_kim[0,2,0] - t_kim[0,6,0]
 Subject To
- R934: yp_kim[0,2,0] = 1
- R960: 0.1 yp_kim[0,2,0] <= 0
+ R64: t_kim[0,2,0] - t_kim[0,6,0] <= -35
+ R337: - t_kim[0,2,0] + t_kim[0,6,0] <= 10.13333333333333
 Bounds
-Binaries
- yp_kim[0,2,0]
+ t_kim[0,2,0] free
+ t_kim[0,6,0] free
 End

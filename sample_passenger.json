@@ -1,82 +1,34 @@
 {
+  "P1": {
+    "id": 1,
+    "origin_location": "Skogsv\u00e5g",
+    "destination_location": "Bergenhus",
+    "lower_tw": 120,
+    "upper_tw": 170,
+    "max_ride_time": 80.0
+  },
+  "P2": {
+    "id": 2,
+    "origin_location": "Hammarsland",
+    "destination_location": "Ytrebygda",
+    "lower_tw": 120,
+    "upper_tw": 170,
+    "max_ride_time": 8.0
+  },
+  "P3": {
+    "id": 3,
+    "origin_location": "Spjeld",
+    "destination_location": "\u00c5rstad",
+    "lower_tw": 120,
+    "upper_tw": 170,
+    "max_ride_time": 58.0
+  },
   "P4": {
     "id": 4,
-    "origin_location": "Landro",
-    "destination_location": "Bergenhus",
-    "lower_tw": 120,
-    "upper_tw": 150,
-    "max_ride_time": 72.0
-  },
-  "P5": {
-    "id": 5,
-    "origin_location": "Solsvik",
-    "destination_location": "Laksev\u00e5g",
-    "lower_tw": 120,
-    "upper_tw": 150,
-    "max_ride_time": 64.0
-  },
-  "P6": {
-    "id": 6,
     "origin_location": "Spjeld",
-    "destination_location": "Bergenhus",
+    "destination_location": "\u00c5rstad",
     "lower_tw": 120,
-    "upper_tw": 150,
-    "max_ride_time": 56.0
-  },
-  "P7": {
-    "id": 7,
-    "origin_location": "Solsvik",
-    "destination_location": "Laksev\u00e5g",
-    "lower_tw": 120,
-    "upper_tw": 150,
-    "max_ride_time": 64.0
-  },
-  "P8": {
-    "id": 8,
-    "origin_location": "Straume",
-    "destination_location": "Bergenhus",
-    "lower_tw": 120,
-    "upper_tw": 150,
-    "max_ride_time": 44.0
-  },
-  "P9": {
-    "id": 9,
-    "origin_location": "Solsvik",
-    "destination_location": "Laksev\u00e5g",
-    "lower_tw": 120,
-    "upper_tw": 150,
-    "max_ride_time": 64.0
-  },
-  "P10": {
-    "id": 10,
-    "origin_location": "Tr\u00e6sneset",
-    "destination_location": "Bergenhus",
-    "lower_tw": 120,
-    "upper_tw": 150,
-    "max_ride_time": 86.0
-  },
-  "P11": {
-    "id": 11,
-    "origin_location": "Bild\u00f8yna",
-    "destination_location": "Laksev\u00e5g",
-    "lower_tw": 120,
-    "upper_tw": 150,
-    "max_ride_time": 30.0
-  },
-  "P12": {
-    "id": 12,
-    "origin_location": "K\u00e5rtveit",
-    "destination_location": "Bergenhus",
-    "lower_tw": 120,
-    "upper_tw": 150,
-    "max_ride_time": 66.0
-  },
-  "P13": {
-    "id": 13,
-    "origin_location": "Kleppest\u00f8",
-    "destination_location": "Laksev\u00e5g",
-    "lower_tw": 120,
-    "upper_tw": 150,
-    "max_ride_time": 34.0
+    "upper_tw": 170,
+    "max_ride_time": 58.0
   }
 }
