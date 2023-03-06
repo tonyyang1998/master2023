@@ -426,7 +426,8 @@ def set_objective():
     model.ModelSense = GRB.MAXIMIZE
     #model.setObjective(quicksum(z_ki[k, i] for k in D for i in PP))
     model.setObjectiveN(quicksum(z_ki[k, i] for k in D for i in PP), index = 0, priority = 1)
-    model.setObjectiveN(- (quicksum((t_kim[k, d_k[k][0], d_k[k][1]] - (t_kim[k, o_k[k][0], o_k[k][1]]) for k in D))) - (quicksum((t_kim[k, nr_passengers + i, 0] - t_kim[k, i, 0]) for k in D for i in PP)), index = 1, priority = 0)
+    model.setObjectiveN(- (quicksum((t_kim[k, d_k[k][0], d_k[k][1]] - (t_kim[k, o_k[k][0], o_k[k][1]]) for k in D))) 
+                        - (quicksum((t_kim[k, nr_passengers + i, 0] - t_kim[k, i, 0]) for k in D for i in PP)), index = 1, priority = 0)
     model.update()
 
 set_objective()
