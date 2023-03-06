@@ -463,15 +463,8 @@ def add_constraints():
     model.addConstrs(t_kim[k, i, m] + T_imjn[(i, m), (nr_passengers + i, n)] - t_kim[k, nr_passengers + i, n] <= 0 for k in D for (i, m) in NP for o in PP for n in [MD_i[o]])
 
     """Time constraint"""
-<<<<<<< HEAD
-    """model.addConstrs(
-        t_kim[k, i, m] + T_imjn[(i, m), (j, n)] - t_kim[k, j, n] - M[k] *(1 - x_kimjn[k, i, m, j, n]) <= 0 for k in D for (i, m) in NR for (j, n) in NR if ((i, m), (j, n)) in A_k[k])
-    model.addConstrs(
-        t_kim[k, i, m] + T_imjn[(i, m), (j, n)] - t_kim[k, j, n] + M[k] *(1 - x_kimjn[k, i, m, j, n]) >= 0 for k in D for (i, m) in NR for (j, n) in NR if ((i, m), (j, n)) in A_k[k])
-=======
     model.addConstrs(t_kim[k, i, m] + T_imjn[(i, m), (j, n)] - t_kim[k, j, n] - M[k] *(1 - x_kimjn[k, i, m, j, n]) <= 0 for k in D for (i, m) in NR for (j, n) in NR if ((i, m), (j, n)) in A_k[k])
     model.addConstrs(t_kim[k, i, m] + T_imjn[(i, m), (j, n)] - t_kim[k, j, n] + M[k] *(1 - x_kimjn[k, i, m, j, n]) >= 0 for k in D for (i, m) in NR for (j, n) in NR if ((i, m), (j, n)) in A_k[k])
->>>>>>> a711f7e3eee54bf395267a15ee3b4812d0fc3525
 
     model.addConstrs(t_kim[k, o_k[k][0], o_k[k][1]] + T_imjn[(o_k[k][0],o_k[k][1]), (i, m)] - t_kim[k, i, m] - M[k] *(1 - xs_kim[k, i, m]) <= 0 for k in D for (i, m) in NP)
     model.addConstrs(t_kim[k, o_k[k][0], o_k[k][1]] + T_imjn[(o_k[k][0],o_k[k][1]), (i, m)] - t_kim[k, i, m] + M[k] *(1 - xs_kim[k, i, m]) >= 0 for k in D for (i, m) in NP)
@@ -487,11 +480,6 @@ def add_constraints():
 
     disposable1 = model.addConstrs(t_kim[k, nr_passengers + i, 0] - t_kim[k, i, 0] <= T_k[i] for k in D for i in PP)
     disposable2 = model.addConstrs(t_kim[k, d_k[k][0], d_k[k][1]] - t_kim[k, o_k[k][0], o_k[k][1]] <= T_k[k] for k in D)
-<<<<<<< HEAD
-    
-    #model.addConstrs(t_kim[k, i, 0] <= t_kim[k, i, m] - (T_im[i, m] * yp_kim[k, i, m]) for k in D for (i, m) in NP + [o_k[k]])
-    #model.addConstrs(t_kim[k, i, 0] >= t_kim[k, i, m] + (T_im[i, m] * yd_kim[k, i, m]) for k in D for (i, m) in ND + [d_k[k]])"""
-=======
 
 
     model.addConstrs(t_kim[k, i, 0] <= t_kim[k, i, m] - (T_im[i, m] * y_kim[k, i, m]) for k in D for i in PP for m in MP_i[i] if (i, m) in NP)
@@ -502,7 +490,6 @@ def add_constraints():
     model.addConstrs(t_kim[k, d_k[k][0], d_k[k][1]] >= t_kim[k, i, m] for k in D for (i, m) in ND + [o_k[k]])
 
 
->>>>>>> a711f7e3eee54bf395267a15ee3b4812d0fc3525
 
     '''Capacity constraint'''
     model.addConstrs(quicksum(z_ki[k, i] for i in PP) <= Q_k[k] for k in D)
