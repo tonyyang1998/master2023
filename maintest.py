@@ -48,7 +48,7 @@ def passenger_candidate_pickup_location_initialization():
     result = {}
     for passenger in passengers_json:
         candidate_locations = []
-        mobility_flex = 5
+        mobility_flex = 7
         for location_pair in all_location_pairs:
             if location_pair[0] == passengers_json[passenger]["origin_location"] and location_pair[0]!=location_pair[1]:
                 if distance_matrix.distance_matrix[location_pair] <= mobility_flex and location_pair[1] != 'Laksevåg' and location_pair[1] != 'Ytrebygda' and location_pair[1] != 'Bergenhus' and location_pair[1] != 'Årstad':
@@ -155,9 +155,6 @@ def initialize_Timjn():
                     stedsnavn2 = drivers_json["D" + str(arc[1][0])]["origin_location"]
                     distance = distance_matrix.distance_matrix[(stedsnavn1, stedsnavn2)]
                     T_imjn[arc] = distance
-
-
-
 
             """Between driver origin and and destination"""
             if arc[0] == o_k[driver] and arc[1] == d_k[driver]:
@@ -473,11 +470,12 @@ def add_constraints():
     model.addConstrs(t_kim[k, i, m] + T_imjn[(i, m), (d_k[k][0], d_k[k][1])] - t_kim[k, d_k[k][0], d_k[k][1]] - M[k] *(1 - xe_kjn[k, i, m]) <= 0 for k in D for (i, m) in ND)
     model.addConstrs(t_kim[k, i, m] + T_imjn[(i, m), (d_k[k][0], d_k[k][1])] - t_kim[k, d_k[k][0], d_k[k][1]] + M[k] *(1 - xe_kjn[k, i, m]) >= 0 for k in D for (i, m) in ND)
 
-    model.addConstrs(A_i1[i] <= t_kim[k, nr_passengers + i, 0] + T_im[nr_passengers + i, 0] for k in D for i in PP)
-    model.addConstrs(t_kim[k, nr_passengers + i, 0] + T_im[nr_passengers + i, 0] <= A_i2[nr_passengers] for k in D for i in PP)
-    
     model.addConstrs(A_i1[k] <= t_kim[k, d_k[k][0], d_k[k][1]] for k in D)
     model.addConstrs(t_kim[k, d_k[k][0], d_k[k][1]] <= A_i2[k] for k in D)
+
+    model.addConstrs(A_i1[i] <= t_kim[k, nr_passengers + i, 0] + T_im[nr_passengers + i, 0] for k in D for i in PP)
+    model.addConstrs(t_kim[k, nr_passengers + i, 0] + T_im[nr_passengers + i, 0] <= A_i2[i] for k in D for i in PP)
+    
 
     disposable1 = model.addConstrs(t_kim[k, nr_passengers + i, 0] - t_kim[k, i, 0] <= T_k[i] for k in D for i in PP)
     disposable2 = model.addConstrs(t_kim[k, d_k[k][0], d_k[k][1]] - t_kim[k, o_k[k][0], o_k[k][1]] <= T_k[k] for k in D)
@@ -497,6 +495,7 @@ def add_constraints():
 
     model.update()
     return disposable1, disposable2
+
 
 
 
@@ -758,12 +757,12 @@ def debug():
 
 def run_only_once():
     optimize()
-
-   
     #debug()
+    print(t_kim.select())
     arcs, paths = get_result()
     plot_path(paths, arcs)
     plt.show()  
+    print(model.getObjective().getValue())
     return arcs, paths
     
 

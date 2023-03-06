@@ -4,23 +4,23 @@
     "origin_location": "Knappskog",
     "destination_location": "Bergenhus",
     "lower_tw": 120,
-    "upper_tw": 150,
+    "upper_tw": 160,
     "max_ride_time": 54.0
   },
   "P2": {
     "id": 2,
-    "origin_location": "Spjeld",
+    "origin_location": "K\u00e5rtveit",
     "destination_location": "\u00c5rstad",
     "lower_tw": 120,
-    "upper_tw": 150,
-    "max_ride_time": 58.0
+    "upper_tw": 160,
+    "max_ride_time": 68.0
   },
   "P3": {
     "id": 3,
     "origin_location": "Solsvik",
     "destination_location": "Laksev\u00e5g",
     "lower_tw": 120,
-    "upper_tw": 150,
+    "upper_tw": 160,
     "max_ride_time": 64.0
   },
   "P4": {
@@ -28,7 +28,7 @@
     "origin_location": "Spjeld",
     "destination_location": "Laksev\u00e5g",
     "lower_tw": 120,
-    "upper_tw": 150,
+    "upper_tw": 160,
     "max_ride_time": 42.0
   }
 }
